@@ -11,6 +11,7 @@
 #define KEEPALIVE_INTERVAL          		5
 #define KEEPALIVE_COUNT             		3
 #define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
+#define HOSTNAME							"meteo_home"
 
 // I2C
 #define I2C_MASTER_SCL_IO           		GPIO_NUM_20				   /*!< GPIO number used for I2C master clock */
