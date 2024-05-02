@@ -55,7 +55,16 @@ char *url_encode(const char *s)
     //char html5[256] = {0};
 
     unsigned char *html5 = calloc(256, 1);
+    if (html5 == NULL)
+    	return NULL;
+
     char *enc = calloc(strlen(s) * 3 + 1, 1);
+    if (enc == NULL)
+    {
+    	free(html5);
+    	return NULL;
+    }
+
     char *enc_begin = enc;
 
     for (int i = 0; i < 256; i++)

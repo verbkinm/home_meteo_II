@@ -132,15 +132,15 @@
 #define UPDATE_FAIL			"A:/sdcard/img/update_fail.png"
 
 // Пути конфигурационных файлов
-#define WIFI_CONF_PATH		"/sdcard/wifi.json"
-#define SNTP_CONF_PATH		"/sdcard/sntp.json"
-#define DISPLAY_PATH		"/sdcard/disp.json"
-#define METEO_CONF_PATH		"/sdcard/meteo.json"
-#define METEO_CHART_PATH	"/sdcard/meteo_chart.json"
-#define METEO_CITY_PATH		"/sdcard/city.json"
-#define METEO_WEEK_PATH		"/sdcard/week.json"
-#define UPDATE_PATH			"/sdcard/update.json"
-#define SENSORS_PATH		"/sdcard/sensors.json"
+#define WIFI_CONF_PATH		 "/sdcard/wifi.json"
+#define SNTP_CONF_PATH		 "/sdcard/sntp.json"
+#define DISPLAY_PATH		 "/sdcard/disp.json"
+#define METEO_CONF_PATH		 "/sdcard/meteo.json"
+#define METEO_CHART_PATH	 "/sdcard/meteo_chart.json"
+#define METEO_CITY_PATH		 "/sdcard/city.json"
+#define METEO_WEEK_PATH		 "/sdcard/week.json"
+#define UPDATE_PATH			 "/sdcard/update.json"
+#define SENSORS_PATH		 "/sdcard/sensors.json"
 
 // Глобалные флаги статусов
 enum STATUS_REG {
@@ -180,29 +180,70 @@ enum UPDATE_FLAGS {
 
 // Повторяющиеся строки текста в коде
 
-#define DISPLAY_STR				"display"
-#define ROTATE_STR 				"rotate"
-#define BRIGHTNESS_STR			"brightness"
-#define NIGHT_MODE_STR			"night_mode"
-#define BRIGHTNESS_DAY_STR		"b_day"
-#define BRIGHTNESS_NIGHT_STR	"b_night"
-#define DAY_BEGIN_STR			"d_begin"
-#define NIGHT_BEGIN_STR			"n_begin"
+#define DISPLAY_STR				 "display"
+#define ROTATE_STR 				 "rotate"
+#define BRIGHTNESS_STR			 "brightness"
+#define NIGHT_MODE_STR			 "night_mode"
+#define BRIGHTNESS_DAY_STR		 "b_day"
+#define BRIGHTNESS_NIGHT_STR	 "b_night"
+#define DAY_BEGIN_STR			 "d_begin"
+#define NIGHT_BEGIN_STR			 "n_begin"
 
-#define THP_STR					"thp"
-#define THP_T_CALIB_STR			"t_calib"
-#define THP_H_CALIB_STR			"h_calib"
-#define THP_P_CALIB_STR			"p_calib"
+#define THP_STR					 "thp"
+#define THP_T_CALIB_STR			 "t_calib"
+#define THP_H_CALIB_STR			 "h_calib"
+#define THP_P_CALIB_STR			 "p_calib"
 
-#define ATTENTION_STR 			"Внимание!"
-#define ERROR_STR 				"Ошибка!"
-#define SAVE_STR 				"Сохранить"
-#define CANCEL_STR 				"Отмена"
-#define YES_STR 				"Да"
-#define NO_STR 					"Нет"
-#define RESET_STR				"Сбросить"
-#define HG_STR					"мм рт.ст."
-#define CITY_STR				"city"
+#define NOTIFICATION_STR		 "notification"
+#define UPDATE_STR				 "update"
+#define URL_STR					 "url"
+#define FIRMWARE_STR			 "firmware"
+#define VERSION_STR				 "version"
+#define WIFI_STR				 "wifi"
+#define SSID_STR				 "ssid"
+#define BSSID_STR				 "bssid"
+#define PWD_STR					 "pwd"
+#define AUTO_STR				 "auto"
+#define SNTP_STR				 "sntp"
+#define UTC_STR					 "utc"
+
+#define HOURLY_STR				 "hourly"
+#define TIME_STR				 "time"
+#define TEMPERATURE_2M_STR		 "temperature_2m"
+#define RELATIVE_HUMIDITY_2M_STR  "relative_humidity_2m"
+#define APPARENT_TEMP_STR 		 "apparent_temperature"
+#define PRECIPITATION_STR 		 "precipitation"
+#define RAIN_STR 				 "rain"
+#define SHOWERS_STR 			 "showers"
+#define SNOWFALL_STR 			 "snowfall"
+#define SURFACE_PRESSURE_STR 	 "surface_pressure"
+#define CLOUD_COVER_STR 		 "cloud_cover"
+#define WIND_SPEED_10M_STR 		 "wind_speed_10m"
+#define WIND_DIRECTION_10M_STR 	 "wind_direction_10m"
+#define WIND_GUSTS_10M_STR 		 "wind_gusts_10m"
+
+#define ATTENTION_STR 			 "Внимание!"
+#define ERROR_STR 				 "Ошибка!"
+#define SAVE_STR 				 "Сохранить"
+#define CANCEL_STR 				 "Отмена"
+#define YES_STR 				 "Да"
+#define NO_STR 					 "Нет"
+#define RESET_STR				 "Сбросить"
+#define HG_STR					 "мм рт.ст."
+#define CITY_STR				 "city"
+
+#define METEO_STR				 "meteo"
+#define ON_STR					 "on"
+#define LATITUDE_STR			 "latitude"
+#define LONGITUDE_STR			 "longitude"
+
+//fmt шаблоны
+#define CANT_WRITE_FILE_TMPLT	"%s can't write \"%s\" file!\n"
+#define CANT_READ_FILE_TMPLT	"%s can't read \"%s\" file!\n"
+
+// Константы
+#define COUNTER_WEATHER			(60 * 15) // раз в 15 минут
+#define COUNTER_CHECK_UPDATE 	(60 * 60) // раз в 1 час
 
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

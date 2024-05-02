@@ -7,6 +7,8 @@
 
 #include "display.h"
 
+static const char *TAG = "DISPLAY";
+
 static void check_display_conf_file(void);
 static void read_display_conf(void);
 
@@ -19,8 +21,6 @@ void service_display_read_conf(void)
 
 void service_display_task(void *pvParameters)
 {
-//	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
-
 	check_display_conf_file();
 	read_display_conf();
 
@@ -32,7 +32,7 @@ void service_display_task(void *pvParameters)
 		if (glob_get_update_reg() & UPDATE_NOW)
 			break;
 
-		if ((glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON))// && (glob_get_status_reg() & STATUS_TIME_SYNC))
+		if (glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON)
 		{
 			time_t now;
 			struct tm timeinfo = { 0 };
@@ -67,7 +67,7 @@ void service_display_task(void *pvParameters)
 static void read_display_conf(void)
 {
 	char *buf = NULL;
-	if (get_display_config_value(ROTATE_STR, &buf))
+	if (get_display_config_value(ROTATE_STR, &buf) && buf != NULL)
 	{
 		if (strcmp(buf, "1") == 0)
 			rotate_display(LV_DISP_ROT_180);
@@ -77,7 +77,7 @@ static void read_display_conf(void)
 		free(buf);
 	}
 
-	if (get_display_config_value(BRIGHTNESS_STR, &buf))
+	if (get_display_config_value(BRIGHTNESS_STR, &buf) && buf != NULL)
 	{
 		int value = 255;
 		sscanf(buf, "%d", &value);
@@ -87,7 +87,7 @@ static void read_display_conf(void)
 		display_service_data.brightnes = value;
 	}
 
-	if (get_display_config_value(NIGHT_MODE_STR, &buf))
+	if (get_display_config_value(NIGHT_MODE_STR, &buf) && buf != NULL)
 	{
 		if (strcmp(buf, "1") == 0)
 			glob_set_bits_status_reg(STATUS_DISPLAY_NIGHT_MODE_ON);
@@ -96,7 +96,7 @@ static void read_display_conf(void)
 		free(buf);
 	}
 
-	if (get_display_config_value(BRIGHTNESS_DAY_STR, &buf))
+	if (get_display_config_value(BRIGHTNESS_DAY_STR, &buf) && buf != NULL)
 	{
 		int value = 255;
 		sscanf(buf, "%d", &value);
@@ -104,7 +104,7 @@ static void read_display_conf(void)
 		free(buf);
 	}
 
-	if (get_display_config_value(BRIGHTNESS_NIGHT_STR, &buf))
+	if (get_display_config_value(BRIGHTNESS_NIGHT_STR, &buf) && buf != NULL)
 	{
 		int value = 255;
 		sscanf(buf, "%d", &value);
@@ -112,7 +112,7 @@ static void read_display_conf(void)
 		free(buf);
 	}
 
-	if (get_display_config_value(DAY_BEGIN_STR, &buf))
+	if (get_display_config_value(DAY_BEGIN_STR, &buf) && buf != NULL)
 	{
 		if (strlen(buf) == 8)
 		{
@@ -125,7 +125,7 @@ static void read_display_conf(void)
 		free(buf);
 	}
 
-	if (get_display_config_value(NIGHT_BEGIN_STR, &buf))
+	if (get_display_config_value(NIGHT_BEGIN_STR, &buf) && buf != NULL)
 	{
 		if (strlen(buf) == 8)
 		{
@@ -141,9 +141,10 @@ static void read_display_conf(void)
 
 static void check_display_conf_file(void)
 {
+	//!!! Нет проверок == NULL
 	cJSON *root = cJSON_CreateObject();
 	cJSON *display = cJSON_CreateObject();
-	cJSON_AddItemToObjectCS(root, DISPLAY_STR, display);
+	cJSON_AddItemToObject(root, DISPLAY_STR, display);
 
 	cJSON *rotate_obj = cJSON_CreateString("0");
 	cJSON_AddItemToObject(display, ROTATE_STR, rotate_obj);
@@ -176,7 +177,7 @@ static void check_display_conf_file(void)
 
 	FILE *file = fopen(DISPLAY_PATH, "w");
 	if (file == NULL)
-		printf("cant write \"%s\" file!\n", DISPLAY_PATH);
+		printf(CANT_WRITE_FILE_TMPLT, TAG, DISPLAY_PATH);
 	else
 	{
 		fprintf(file, "%s", cJSON_Print(root));

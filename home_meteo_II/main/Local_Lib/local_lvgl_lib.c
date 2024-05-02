@@ -15,7 +15,7 @@ static uint32_t glob_update_reg = 0;
 
 static const char *days_str_short[7] = {"вс", "пн", "вт", "ср", "чт", "пт", "сб"};
 static const char *days_str_full[7] = {"Воскресенье", "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота"};
-static const char *btns_txt[] = {YES_STR, NO_STR, NULL};
+static const char *btns_txt[] = {"Да", "Нет", NULL};
 
 static void create_dialog_box_accept_handler(lv_event_t * e);
 

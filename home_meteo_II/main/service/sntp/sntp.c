@@ -42,24 +42,24 @@ static void check_sntp_conf_file(void)
 	cJSON *root = cJSON_CreateObject();
 
 	cJSON *sntp = cJSON_CreateObject();
-	cJSON_AddItemToObjectCS(root, "sntp", sntp);
+	cJSON_AddItemToObjectCS(root, SNTP_STR, sntp);
 
 	cJSON *on_obj = cJSON_CreateString("0");
-	cJSON_AddItemToObject(sntp, "on", on_obj);
+	cJSON_AddItemToObject(sntp, ON_STR, on_obj);
 
 	cJSON *utc_obj = cJSON_CreateString("UTC-3");
-	cJSON_AddItemToObjectCS(sntp, "utc", utc_obj);
+	cJSON_AddItemToObjectCS(sntp, UTC_STR, utc_obj);
 
-	cJSON *url_obj = cJSON_CreateString("pool.ntp.org");
-	cJSON_AddItemToObjectCS(sntp, "url", url_obj);
+	cJSON *url_obj = cJSON_CreateString(sntp_server_url_default);
+	cJSON_AddItemToObjectCS(sntp, URL_STR, url_obj);
 
-	get_sntp_config_value("on", &on_obj->valuestring);
-	get_sntp_config_value("utc", &utc_obj->valuestring);
-	get_sntp_config_value("url", &url_obj->valuestring);
+	get_sntp_config_value(ON_STR, &on_obj->valuestring);
+	get_sntp_config_value(UTC_STR, &utc_obj->valuestring);
+	get_sntp_config_value(URL_STR, &url_obj->valuestring);
 
 	FILE *file = fopen(SNTP_CONF_PATH, "w");
 	if (file == NULL)
-		printf("cant write \"%s\" file!\n", WIFI_CONF_PATH);
+		printf(CANT_WRITE_FILE_TMPLT, TAG, WIFI_CONF_PATH);
 	else
 	{
 		fprintf(file, "%s", cJSON_Print(root));
@@ -71,9 +71,9 @@ static void check_sntp_conf_file(void)
 
 void read_sntp_conf(void)
 {
-	char *on;
+	char *on = NULL;
 
-	if (get_sntp_config_value("on", &on))
+	if (get_sntp_config_value(ON_STR, &on) && on != NULL)
 	{
 		if (strcmp(on, "1") == 0)
 			glob_set_bits_status_reg(STATUS_SNTP_ON);
@@ -82,10 +82,10 @@ void read_sntp_conf(void)
 		free(on);
 	}
 
-	if (!get_sntp_config_value("utc", &sntp_utc))
+	if (!get_sntp_config_value(UTC_STR, &sntp_utc))
 		sntp_utc = (char *)sntp_utc_default;
 
-	if (!get_sntp_config_value("url", &sntp_server_url))
+	if (!get_sntp_config_value(URL_STR, &sntp_server_url))
 		sntp_server_url = (char *)sntp_server_url_default;
 }
 

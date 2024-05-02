@@ -28,42 +28,54 @@ static bool parse_http_response(const char* content);
 static void check_update_conf_file(void)
 {
 	cJSON *root = cJSON_CreateObject();
+	if (root == NULL)
+		return;
 
 	cJSON *update = cJSON_CreateObject();
-	cJSON_AddItemToObjectCS(root, "update", update);
+	if (update == NULL)
+		goto end;
+
+	cJSON_AddItemToObjectCS(root, UPDATE_STR, update);
 
 	cJSON *update_notification = cJSON_CreateString("1");
-	cJSON_AddItemToObject(update, "notification", update_notification);
+	if (update_notification == NULL)
+		goto end;
+
+	cJSON_AddItemToObject(update, NOTIFICATION_STR, update_notification);
 
 	cJSON *url_obj = cJSON_CreateString(url_update_info);
-	cJSON_AddItemToObjectCS(update, "url", url_obj);
+	if (url_obj == NULL)
+		goto end;
 
-	get_update_config_value("url", &url_obj->valuestring);
-	get_update_config_value("notification", &update_notification->valuestring);
+	cJSON_AddItemToObjectCS(update, URL_STR, url_obj);
+
+	get_update_config_value(URL_STR, &url_obj->valuestring);
+	get_update_config_value(NOTIFICATION_STR, &update_notification->valuestring);
 
 	FILE *file = fopen(UPDATE_PATH, "w");
 	if (file == NULL)
-		ESP_LOGE(TAG, "cant write \"%s\" file!\n", UPDATE_PATH);
+		printf(CANT_WRITE_FILE_TMPLT, TAG, UPDATE_PATH);
 	else
 	{
 		fprintf(file, "%s", cJSON_Print(root));
 		fclose(file);
 	}
 
+	end:
 	cJSON_Delete(root);
 }
 
 static void read_update_conf(void)
 {
 	char *buf = NULL;
-	if (get_update_config_value("notification", &buf))
+	if (get_update_config_value(NOTIFICATION_STR, &buf))
 	{
 		if (strcmp(buf, "1") == 0)
 			glob_set_bits_update_reg(UPDATE_NOTIFICATION);
 		free(buf);
 	}
 
-	if (get_meteo_config_value("url", &buf))
+	if (get_meteo_config_value(URL_STR, &buf))
 	{
 		if (buf != NULL)
 		{
@@ -79,11 +91,11 @@ static bool parse_http_response(const char* content)
 	if (root == NULL)
 		return false;
 
-	cJSON *firmware = cJSON_GetObjectItemCaseSensitive(root, "firmware");
+	cJSON *firmware = cJSON_GetObjectItemCaseSensitive(root, FIRMWARE_STR);
 	if (firmware == NULL)
 		goto bad_end;
 
-	cJSON *version = cJSON_GetObjectItemCaseSensitive(firmware, "version");
+	cJSON *version = cJSON_GetObjectItemCaseSensitive(firmware, VERSION_STR);
 	if (version == NULL)
 		goto bad_end;
 
@@ -91,7 +103,7 @@ static bool parse_http_response(const char* content)
 	if (new_version_from_server == NULL || strlen(new_version_from_server) == 0)
 		goto bad_end;
 
-	cJSON *url = cJSON_GetObjectItemCaseSensitive(firmware, "url");
+	cJSON *url = cJSON_GetObjectItemCaseSensitive(firmware, URL_STR);
 	char *new_url = cJSON_GetStringValue(url);
 	if (new_url == NULL || strlen(new_url) == 0)
 		goto bad_end;
@@ -176,7 +188,6 @@ void update_service_task(void *pvParameters)
 
 	strcpy(available_version, default_version);
 
-	const uint16_t COUNTER_CHECK_UPDATE = 60 * 60; // раз в 1 час
 	uint16_t counter = COUNTER_CHECK_UPDATE;
 
 	for( ;; )

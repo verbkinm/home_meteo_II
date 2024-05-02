@@ -23,7 +23,7 @@ static void update_handler(lv_event_t * e)
 
 	if (strcmp(lv_msgbox_get_active_btn_text(dialog_box), YES_STR) == 0)
 	{
-		ESP_LOGE(TAG, YES_STR);
+		printf("%s %s", TAG, YES_STR);
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
 		{
 			create_msgbox_not_connected();

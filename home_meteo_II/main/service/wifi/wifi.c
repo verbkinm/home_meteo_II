@@ -7,6 +7,8 @@
 
 #include "wifi.h"
 
+static const char *TAG = "WIFI";
+
 esp_netif_t *sta_netif;
 
 static void wifi_init(void);
@@ -58,7 +60,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 {
 	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
 	{
-		printf("wifi sta start\n");
+		printf("%s sta start\n", WIFI_STR);
 		glob_set_bits_status_reg(STATUS_WIFI_STA_START);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
@@ -68,7 +70,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_STOP)
 	{
-		printf("wifi sta stop\n");
+		printf("%s sta stop\n", WIFI_STR);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_START);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
@@ -78,7 +80,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
 	{
-		printf("wifi sta connected\n");
+		printf("%s sta connected\n", WIFI_STR);
 		glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 
@@ -98,17 +100,17 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 		wifi_ap_config_t *ap_info = (wifi_ap_config_t *)event_data;
 		printf("ap_info->ssid %s\n", ap_info->ssid);
 
-		set_wifi_config_value("ssid", ssid_str);
-		set_wifi_config_value("bssid", mac_str);
-		bool res = set_wifi_config_value("pwd", pwd_str);
-		set_wifi_config_value("auto", "1");
+		set_wifi_config_value(SSID_STR, ssid_str);
+		set_wifi_config_value(BSSID_STR, mac_str);
+		bool res = set_wifi_config_value(PWD_STR, pwd_str);
+		set_wifi_config_value(AUTO_STR, "1");
 		glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 
 		printf("write pwd %d, pwd = %s\n", (int)res, pwd_str);
 	}
 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
 	{
-		printf("wifi sta disconnect\n");
+		printf("%s sta disconnect\n", WIFI_STR);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTED);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 		//		glob_status_reg &= ~STATUS_WIFI_SCANNING;
@@ -123,15 +125,15 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
 	{
 		glob_set_bits_status_reg(STATUS_IP_GOT);
-		printf("wifi sta got ip\n");
+		printf("%s sta got ip\n", WIFI_STR);
 	}
 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_LOST_IP)
 	{
-		printf("wifi sta ip lost\n");
+		printf("%s sta ip lost\n", WIFI_STR);
 		glob_clear_bits_status_reg(STATUS_IP_GOT);
 	}
 	else if (event_base == WIFI_EVENT)
-		printf("wifi other event: %s\n", event_base);
+		printf("%s other event: %s\n", WIFI_STR, event_base);
 }
 
 static void check_wifi_conf_file(void)
@@ -139,28 +141,28 @@ static void check_wifi_conf_file(void)
 	cJSON *root = cJSON_CreateObject();
 
 	cJSON *wifi = cJSON_CreateObject();
-	cJSON_AddItemToObjectCS(root, "wifi", wifi);
+	cJSON_AddItemToObjectCS(root, WIFI_STR, wifi);
 
 	cJSON *on_obj = cJSON_CreateString("0");
-	cJSON_AddItemToObject(wifi, "on", on_obj);
+	cJSON_AddItemToObject(wifi, ON_STR, on_obj);
 
 	cJSON *auto_con_obj = cJSON_CreateString("0");
-	cJSON_AddItemToObjectCS(wifi, "auto", auto_con_obj);
+	cJSON_AddItemToObjectCS(wifi, AUTO_STR, auto_con_obj);
 
 	cJSON *ssid_obj = cJSON_CreateString("");
-	cJSON_AddItemToObjectCS(wifi, "ssid", ssid_obj);
+	cJSON_AddItemToObjectCS(wifi, SSID_STR, ssid_obj);
 
 	cJSON *pwd_obj = cJSON_CreateString("");
-	cJSON_AddItemToObjectCS(wifi, "pwd", pwd_obj);
+	cJSON_AddItemToObjectCS(wifi, PWD_STR, pwd_obj);
 
-	get_wifi_config_value("on", &on_obj->valuestring);
-	get_wifi_config_value("auto", &auto_con_obj->valuestring);
-	get_wifi_config_value("ssid", &ssid_obj->valuestring);
-	get_wifi_config_value("pwd", &pwd_obj->valuestring);
+	get_wifi_config_value(ON_STR, &on_obj->valuestring);
+	get_wifi_config_value(AUTO_STR, &auto_con_obj->valuestring);
+	get_wifi_config_value(SSID_STR, &ssid_obj->valuestring);
+	get_wifi_config_value(PWD_STR, &pwd_obj->valuestring);
 
     FILE *file = fopen(WIFI_CONF_PATH, "w");
     if (file == NULL)
-        printf("cant write \"%s\" file!\n", WIFI_CONF_PATH);
+        printf(CANT_WRITE_FILE_TMPLT, TAG, WIFI_CONF_PATH);
     else
     {
     	fprintf(file, "%s", cJSON_Print(root));
@@ -177,13 +179,11 @@ static void read_wifi_conf(void)
 	char *ssid = NULL;
 	char *pwd = NULL;
 
-	//	uint8_t bssid_arr[6];
-
 	wifi_config_t wifi_config;
 	esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
 	// Автоматическое включение wifi
-	if (get_wifi_config_value("on", &on))
+	if (get_wifi_config_value(ON_STR, &on) && on != NULL)
 	{
 		if (strcmp("1", on) == 0)
 			esp_wifi_start();
@@ -193,7 +193,7 @@ static void read_wifi_conf(void)
 	}
 
 	// SSID точки доступа
-	if (get_wifi_config_value("ssid", &ssid))
+	if (get_wifi_config_value(SSID_STR, &ssid) && ssid != NULL)
 	{
 		strcpy((char *)wifi_config.sta.ssid, ssid);
 //		printf("read wifi conf. ssid = %s\n", ssid);
@@ -201,7 +201,7 @@ static void read_wifi_conf(void)
 	}
 
 	// Пароль точки доступа
-	if (get_wifi_config_value("pwd", &pwd))
+	if (get_wifi_config_value(PWD_STR, &pwd) && pwd != NULL)
 	{
 		strcpy((char *)wifi_config.sta.password, pwd);
 //		printf("read wifi conf. pwd = %s\n", pwd);
@@ -209,7 +209,7 @@ static void read_wifi_conf(void)
 	}
 
 	// Автоматическое подключение
-	if (get_wifi_config_value("auto", &auto_on))
+	if (get_wifi_config_value(AUTO_STR, &auto_on) && auto_on != NULL)
 	{
 		if (strcmp("1", auto_on) == 0)
 			glob_set_bits_status_reg(STATUS_WIFI_AUTOCONNECT);

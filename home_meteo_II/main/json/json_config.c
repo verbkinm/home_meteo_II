@@ -165,21 +165,21 @@ static bool get_config_value(const char* file_path, const char *group, const cha
 
 bool set_wifi_config_value(const char *key, const char *value)
 {
-	return set_config_value(WIFI_CONF_PATH, "wifi", key, value);
+	return set_config_value(WIFI_CONF_PATH, WIFI_STR, key, value);
 }
 
 bool get_wifi_config_value(const char *key, char **value)
 {
-	return get_config_value(WIFI_CONF_PATH, "wifi", key, value);
+	return get_config_value(WIFI_CONF_PATH, WIFI_STR, key, value);
 }
 
 bool set_sntp_config_value(const char *key, const char *value)
 {
-	return set_config_value(SNTP_CONF_PATH, "sntp", key, value);
+	return set_config_value(SNTP_CONF_PATH, SNTP_STR, key, value);
 }
 
 bool get_sntp_config_value(const char *key, char **value)
 {
-	return get_config_value(SNTP_CONF_PATH, "sntp", key, value);
+	return get_config_value(SNTP_CONF_PATH, SNTP_STR, key, value);
 }
 
