@@ -141,7 +141,7 @@ static bool parse_http_response(const char* content)
 
 static void chek_update(void)
 {
-	ESP_LOGI(TAG, "check update");
+//	ESP_LOGI(TAG, "check update");
 	esp_http_client_config_t config = {
 			.url = url_update_info,
 			.crt_bundle_attach = esp_crt_bundle_attach,
