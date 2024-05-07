@@ -1,14 +1,14 @@
 /*
- * Аналгоговые часы
+ * Бинарные часы
  *
  * datetime3.h
  *
- *  Created on: 7 мая 2024 г.
+ *  Created on: 25 янв. 2024 г.
  *      Author: user
  */
 
-#ifndef MAIN_SCREEN_PAGE_DATETIME3_DATETIME3_H_
-#define MAIN_SCREEN_PAGE_DATETIME3_DATETIME3_H_
+#ifndef MAIN_SCREEN_PAGE_HOMEPAGE_DATETIME3_DATETIME3_H_
+#define MAIN_SCREEN_PAGE_HOMEPAGE_DATETIME3_DATETIME3_H_
 
 #include <time.h>
 #include <stdio.h>
@@ -24,4 +24,4 @@
 void datetime3_page_init(void);
 void datetime3_page_deinit(void);
 
-#endif /* MAIN_SCREEN_PAGE_DATETIME3_DATETIME3_H_ */
+#endif /* MAIN_SCREEN_PAGE_HOMEPAGE_DATETIME3_DATETIME3_H_ */
