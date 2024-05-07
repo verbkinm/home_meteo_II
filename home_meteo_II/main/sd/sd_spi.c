@@ -7,17 +7,10 @@
 
 #include "sd_spi.h"
 
-#include "esp_vfs_fat.h"
-#include "sdmmc_cmd.h"
-#include "stdbool.h"
-#include <string.h>
-#include <sys/unistd.h>
-#include <sys/stat.h>
-
 #define MOUNT_POINT "/sdcard"
-#define EXAMPLE_MAX_CHAR_SIZE    64
 
 static char *TAG = "SD SPI";
+static sdmmc_card_t *card;
 
 static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdinfo);
 
@@ -64,7 +57,6 @@ esp_err_t sd_spi_init(void)
 			.max_files = 10,
 			.allocation_unit_size = 32 * 1024
 	};
-	sdmmc_card_t *card;
 	const char mount_point[] = MOUNT_POINT;
 	ESP_LOGI(TAG, "Initializing SD card");
 	ESP_LOGI(TAG, "Using SPI peripheral");
@@ -140,6 +132,10 @@ void sd_spi_space_info(uint32_t *totalKB, uint32_t *availableKB)
 	*availableKB = fre_sect / 2;
 }
 
+sdmmc_card_t *sd_spi_card()
+{
+	return card;
+}
 //void sd_spi_deinit(void)
 //{
 //	const char mount_point[] = MOUNT_POINT;

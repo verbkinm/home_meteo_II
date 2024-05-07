@@ -144,7 +144,7 @@ void clear_busy_indicator(lv_obj_t **indicator)
 	*indicator = NULL;
 }
 
-lv_obj_t *create_lbl_obj(lv_obj_t *parent, const char* txt,
+lv_obj_t *create_lbl_obj(lv_obj_t *parent, const char *txt,
 		const lv_obj_t *align_to_obj, lv_align_t align,
 		lv_coord_t x_ofs, lv_coord_t y_ofs,
 		lv_color_t color, lv_font_t *font)

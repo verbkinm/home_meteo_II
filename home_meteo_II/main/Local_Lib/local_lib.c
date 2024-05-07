@@ -133,7 +133,7 @@ void remove_char(char *str, char t)
 
     int i, j;
     i = 0;
-    while( i < strlen(str))
+    while (i < strlen(str))
     {
         if (str[i] == t)
         {

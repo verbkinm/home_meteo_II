@@ -141,6 +141,7 @@
 #define METEO_WEEK_PATH		 "/sdcard/week.json"
 #define UPDATE_PATH			 "/sdcard/update.json"
 #define SENSORS_PATH		 "/sdcard/sensors.json"
+#define TMP_FILE_TXT         "/sdcard/tmp.txt"
 
 // Глобалные флаги статусов
 enum STATUS_REG {

@@ -23,6 +23,7 @@ lv_obj_t *sub_wifi_page;
 lv_obj_t *sub_weather_page;
 lv_obj_t *sub_update_page;
 lv_obj_t *sub_sensors_page;
+lv_obj_t *sub_sd_page;
 
 static const char *root_page_title = "Настройки";
 static const char *date_time_page_title = "Дата/Время";
@@ -34,6 +35,7 @@ static const char *date_page_title = "Дата";
 static const char *weather_page_title = "Погода";
 static const char *update_page_title = "Обновление";
 static const char *sensors_page_title = "Датчики";
+static const char *sd_page_title = "SD";
 
 static void create_sub_pages(void);
 
@@ -43,6 +45,7 @@ static void create_wifi_page(lv_obj_t *parent);
 static void create_weather_page(lv_obj_t *parent);
 static void create_update_page(lv_obj_t *parent);
 static void create_sensors_page(lv_obj_t *parent);
+static void create_sd_page(lv_obj_t *parent);
 
 static void create_sub_pages(void)
 {
@@ -56,6 +59,7 @@ static void create_sub_pages(void)
 	sub_weather_page = lv_menu_page_create(menu, (char *)weather_page_title);
 	sub_update_page = lv_menu_page_create(menu, (char *)update_page_title);
 	sub_sensors_page = lv_menu_page_create(menu, (char *)sensors_page_title);
+	sub_sd_page = lv_menu_page_create(menu, (char *)sd_page_title);
 }
 
 void clear_all_sub_page_child(void)
@@ -80,6 +84,9 @@ void clear_all_sub_page_child(void)
 
 	lv_obj_clean(sub_sensors_page);
 	free_sensors_sub_page();
+
+	lv_obj_clean(sub_sd_page);
+	free_sd_sub_page();
 }
 
 static void create_date_time_page(lv_obj_t *parent)
@@ -124,6 +131,13 @@ static void create_sensors_page(lv_obj_t *parent)
 	lv_obj_add_event_cb(cont, create_sensors_sub_page, LV_EVENT_CLICKED, cont);
 }
 
+static void create_sd_page(lv_obj_t *parent)
+{
+	lv_obj_t *cont = create_text(parent, LV_SYMBOL_SD_CARD, sd_page_title, LV_MENU_ITEM_BUILDER_VAR_1);
+	lv_menu_set_load_page_event(menu, cont, sub_sd_page);
+	lv_obj_add_event_cb(cont, create_sd_sub_page, LV_EVENT_CLICKED, cont);
+}
+
 void settingPageInit(void)
 {
 	page_t *page = current_page();
@@ -164,6 +178,7 @@ void settingPageInit(void)
 	create_weather_page(section);
 	create_update_page(section);
 	create_sensors_page(section);
+	create_sd_page(section);
 
 	lv_menu_set_sidebar_page(menu, root_page);
 }
@@ -184,6 +199,7 @@ void setting_page_deinit(void)
 	((lv_menu_page_t *)sub_weather_page)->title = NULL;
 	((lv_menu_page_t *)sub_update_page)->title = NULL;
 	((lv_menu_page_t *)sub_sensors_page)->title = NULL;
+	((lv_menu_page_t *)sub_sd_page)->title = NULL;
 
 	default_page_deinit();
 }
