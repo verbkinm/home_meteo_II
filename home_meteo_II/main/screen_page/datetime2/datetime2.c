@@ -80,7 +80,7 @@ void set_color(lv_obj_t *obj, uint8_t value)
 
 static void event_handler(lv_event_t *e)
 {
-	datetime1_page_init();
+	datetime3_page_init();
 }
 
 static void timer_handler(lv_timer_t *timer)

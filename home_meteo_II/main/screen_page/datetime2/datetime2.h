@@ -1,4 +1,6 @@
 /*
+ * Бинарные часы
+ *
  * datetime2.h
  *
  *  Created on: 25 янв. 2024 г.
@@ -15,7 +17,7 @@
 #include "Global_def.h"
 #include "Local_Lib/local_lvgl_lib.h"
 #include "screen_page/screendefault.h"
-#include "screen_page/datetime1/datetime1.h"
+#include "screen_page/datetime3/datetime3.h"
 #include "screen_page/page.h"
 #include "status_panel/status_panel.h"
 

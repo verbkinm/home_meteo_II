@@ -238,9 +238,12 @@ enum UPDATE_FLAGS {
 #define LATITUDE_STR			 "latitude"
 #define LONGITUDE_STR			 "longitude"
 
+#define SETTING_STR				 "Настройки"
+
 //fmt шаблоны
 #define CANT_WRITE_FILE_TMPLT	"%s can't write \"%s\" file!\n"
 #define CANT_READ_FILE_TMPLT	"%s can't read \"%s\" file!\n"
+#define CANT_REMOVE_FILE_TMPLT	"%s can't remove \"%s\" file!\n"
 
 // Константы
 #define COUNTER_WEATHER			(60 * 15) // раз в 15 минут

@@ -7,7 +7,6 @@
 
 #include "sd.h"
 
-
 extern lv_obj_t *sub_sd_page;
 
 static const char *TAG = "SETTING SD";
@@ -24,7 +23,7 @@ static int sd_info(char *buf, size_t buf_size)
 	FILE *stream = fopen(TMP_FILE_TXT, "w+");
 	if (stream == NULL)
 	{
-		ESP_LOGE(TAG, "can't open %s file", TMP_FILE_TXT);
+		printf(CANT_WRITE_FILE_TMPLT, TAG, TMP_FILE_TXT);
 		return -1;
 	}
 
@@ -95,7 +94,7 @@ static int sd_info(char *buf, size_t buf_size)
 
 	fclose(stream);
 	if (remove(TMP_FILE_TXT) != 0)
-		ESP_LOGW(TAG, "can't remove %s file", TMP_FILE_TXT);
+		printf(CANT_REMOVE_FILE_TMPLT, TAG, TMP_FILE_TXT);
 
 	return 0;
 }

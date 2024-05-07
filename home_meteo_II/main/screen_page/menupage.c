@@ -18,6 +18,7 @@ extern void settingPageInit(void);
 static void btn_main_handler(lv_event_t *e);
 static void btn_datetime1_handler(lv_event_t *e);
 static void btn_datetime2_handler(lv_event_t *e);
+static void btn_datetime3_handler(lv_event_t *e);
 static void btn_setting_handler(lv_event_t *e);
 static void btn_meteochart_handler(lv_event_t *e);
 static void btn_home_meteo_handler(lv_event_t *e);
@@ -35,6 +36,11 @@ static void btn_datetime1_handler(lv_event_t *e)
 static void btn_datetime2_handler(lv_event_t *e)
 {
 	datetime2_page_init();
+}
+
+static void btn_datetime3_handler(lv_event_t *e)
+{
+	datetime3_page_init();
 }
 
 static void btn_setting_handler(lv_event_t *e)
@@ -68,8 +74,8 @@ void menuPageInit(void)
 	lv_obj_add_style(widget, screenStyleDefault(), 0);
 
 	const int SIZE = 100;
-	const int COUNT = 6;
-	const int COLUMN = 3;
+	const int COUNT = 7;
+	const int COLUMN = 4;
 	int ROW = COUNT / COLUMN;
 	if (COUNT % COLUMN > 0)
 		++ROW;
@@ -78,7 +84,7 @@ void menuPageInit(void)
 	lv_obj_t *btns[COUNT];
 
 	void (*cb[])(lv_event_t *e) = {btn_main_handler, btn_datetime1_handler,
-			btn_datetime2_handler, btn_setting_handler,
+			btn_datetime2_handler, btn_datetime3_handler, btn_setting_handler,
 			btn_meteochart_handler, btn_home_meteo_handler};
 
 

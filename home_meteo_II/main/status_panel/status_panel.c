@@ -31,19 +31,10 @@ void status_panel_init(void)
 	lv_obj_set_style_pad_all(status_panel, 0, 0);
 	lv_obj_add_style(status_panel, screenStyleDefault(), 0);
 
-//	// Свобондо/занято памяти на sd
-//	lbl_mem  = create_lbl_obj(status_panel, NULL, NULL, LV_ALIGN_RIGHT_MID, -5, 0, lv_color_white(), &ubuntu_mono_14);
-
-//	// Статус SD
-//	icon_sd = lv_img_create(status_panel);
-//	lv_obj_set_size(icon_sd, 24, 24);
-//	lv_obj_align_to(icon_sd, lbl_mem, LV_ALIGN_OUT_LEFT_MID, -5, 0);
-
 	// Статус wifi
 	icon_wifi = lv_img_create(status_panel);
 	lv_obj_set_size(icon_wifi, 24, 24);
 	lv_obj_align(icon_wifi, LV_ALIGN_RIGHT_MID, -5, 0);
-//	lv_obj_align_to(icon_wifi, icon_sd, LV_ALIGN_OUT_LEFT_MID, -5, 0);
 
 	// Название страницы
 	title_lbl = create_lbl_obj(status_panel, current_page()->title, NULL, LV_ALIGN_CENTER, 0, 0, lv_color_white(), &ubuntu_mono_14);
@@ -78,14 +69,5 @@ void status_panel_update(void)
 		lv_img_set_src(icon_wifi, WIFI_DISABLE);
 
 	lv_label_set_text_fmt(title_lbl, "%s", current_page()->title);
-
-//	uint32_t total, available;
-//	sd_spi_space_info(&total, &available);
-//
-//	lv_label_set_text_fmt(lbl_mem, "(%d%%)", (total > 0) ? (int)(100 - (float)available / total * 100) : 0);
-//
-//	lv_obj_align_to(icon_sd, lbl_mem, LV_ALIGN_OUT_LEFT_MID, -5, 0);
-//	lv_obj_align_to(icon_wifi, icon_sd, LV_ALIGN_OUT_LEFT_MID, -5, 0);
-
 	lv_label_set_text_fmt(heap_lbl, "%u", heap_caps_get_free_size(0));
 }
