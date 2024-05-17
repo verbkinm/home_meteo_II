@@ -247,7 +247,7 @@ static void timer_handler(lv_timer_t *timer)
 	{
 		counter_thp = 0;
 
-		const struct THP *thp = BME280_service_get_value();
+		const struct THP *thp = service_BME280_get_value();
 		lv_label_set_text_fmt(temperature1_lbl, "%+.2f°C", thp->temperature);
 		lv_label_set_text_fmt(humidity1_lbl, "%.2f %%", thp->humidity);
 		lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);

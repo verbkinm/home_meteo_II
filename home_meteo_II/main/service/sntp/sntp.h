@@ -19,8 +19,13 @@
 #include "Local_Lib/local_lvgl_lib.h"
 #include "I2C/DS3231.h"
 
-void sntp_service_task(void *pvParameters);
-void read_sntp_conf(void);
-void sntp_obtain_time(void);
+void service_sntp_task(void *pvParameters);
+void service_sntp_read_conf(void);
+void service_sntp_obtain_time(void);
+
+const char *service_sntp_utc(void);
+const char *service_sntp_url(void);
+
+void service_sntp_update(void);
 
 #endif /* MAIN_SERVICE_SNTP_SNTP_H_ */

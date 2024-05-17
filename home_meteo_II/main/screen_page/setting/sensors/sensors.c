@@ -33,7 +33,7 @@ static void timer_loop(lv_timer_t *timer);
 
 static void timer_loop(lv_timer_t *timer)
 {
-	struct THP thp = *BME280_service_get_value_without_calibration();
+	struct THP thp = *service_BME280_get_value_without_calibration();
 
 	thp.temperature += thp.temperature / 1000 * tmp_temperature_calib_per;
 	thp.humidity += thp.humidity / 1000 * tmp_humidity_calib_per;
@@ -50,7 +50,7 @@ static void save(lv_event_t *e)
 	BME280_set_calib_humidity(tmp_humidity_calib_per);
 	BME280_set_calib_pressure(tmp_pressure_calib_per);
 
-	BME280_service_save_calibrations();
+	service_BME280_save_calibrations();
 }
 
 static void reset(lv_event_t *e)

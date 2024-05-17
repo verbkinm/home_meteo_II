@@ -14,9 +14,6 @@ extern lv_obj_t *sub_sub_time_page;
 extern lv_obj_t *sub_sub_date_page;
 extern lv_obj_t *sub_sub_sntp_page;
 
-extern char *sntp_utc;
-extern char *sntp_server_url;
-
 static char *time_page_title = "Время";
 static char *date_page_title = "Дата";
 static char *sntp_page_title = "SNTP";
@@ -126,6 +123,7 @@ void create_sntp_page(void)
 	lv_obj_add_event_cb(dt_page_obj->list, utc_dd_event_handler, LV_EVENT_ALL, NULL);
 
 	int val = 0;
+	char *sntp_utc = service_sntp_utc();
 	if (strlen(sntp_utc) > 3)
 		sscanf(&sntp_utc[4], "%d", &val);
 	lv_dropdown_set_selected(dt_page_obj->list, val);
@@ -142,7 +140,7 @@ void create_sntp_page(void)
 	lv_textarea_set_max_length(dt_page_obj->sntp_server_url, 128);
 	lv_textarea_set_placeholder_text(dt_page_obj->sntp_server_url, "Пример: ntp0.ntp-servers.net");
 	lv_obj_align_to(dt_page_obj->sntp_server_url, dt_page_obj->list, LV_ALIGN_OUT_BOTTOM_RIGHT, 0, 15);
-	lv_textarea_set_text(dt_page_obj->sntp_server_url, sntp_server_url);
+	lv_textarea_set_text(dt_page_obj->sntp_server_url, service_sntp_url());
 
 	// Текст для адреса сервера
 	lv_obj_t *lbl_url = lv_label_create(wrap);

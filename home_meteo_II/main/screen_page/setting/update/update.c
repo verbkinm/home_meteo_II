@@ -84,7 +84,7 @@ static void timer_loop(lv_timer_t *timer)
 	if ( !(glob_get_update_reg() & UPDATE_CHECK) && busy_ind != NULL)
 		clear_busy_indicator(&busy_ind);
 
-	lv_label_set_text_fmt(new_version_lbl, "%s %s", new_version_str, update_service_get_available_version());
+	lv_label_set_text_fmt(new_version_lbl, "%s %s", new_version_str, service_update_get_available_version());
 
 	if (glob_get_update_reg() & UPDATE_AVAILABLE)
 		lv_obj_clear_state(btn_update, LV_STATE_DISABLED);

@@ -15,8 +15,9 @@ static open_meteo_data_t *open_meteo = NULL;
 static const char *city_url = "https://geocoding-api.open-meteo.com/v1/search?count=20&language=ru&format=json&name=";
 static const char *meteo_url = "https://api.open-meteo.com/v1/forecast?forecast_days=3&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,rain,showers,snowfall,surface_pressure,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timeformat=unixtime&timezone=auto&latitude=";
 
+static uint16_t counter = COUNTER_WEATHER;
+
 static void check_meteo_conf_file(void);
-static void read_meteo_conf(void);
 static char *generate_url_meteo(void);
 static bool parse_open_meteo_weather(const char *data, open_meteo_data_t *open_meteo_week);
 static void http_city_search(void);
@@ -146,7 +147,13 @@ static void http_city_search(void)
 	};
 
 	esp_http_client_handle_t client = esp_http_client_init(&config);
-	esp_http_client_open(client, 0);
+	if (esp_http_client_open(client, 0) != ESP_OK)
+	{
+		free(response_buffer);
+		free(url);
+		return;
+	}
+
 	esp_http_client_fetch_headers(client);
 
 	FILE *file = fopen(METEO_CITY_PATH, "w");
@@ -217,7 +224,7 @@ static char *generate_url_meteo(void)
 	return url;
 }
 
-static void read_meteo_conf(void)
+void service_weather_read_conf(void)
 {
 	char *on = NULL;
 	if (get_meteo_config_value(ON_STR, &on) && on != NULL)
@@ -527,7 +534,9 @@ static void http_meteo_to_file(void)
 	};
 	esp_http_client_handle_t client = esp_http_client_init(&config);
 
-	esp_http_client_open(client, 0);
+	if (esp_http_client_open(client, 0) != ESP_OK)
+		goto http_open_error;
+
 	esp_http_client_fetch_headers(client);
 
 	FILE *file = fopen(METEO_WEEK_PATH, "w");
@@ -545,7 +554,7 @@ static void http_meteo_to_file(void)
 			break;
 
 		fwrite(response_buffer, ret, 1, file);
-		vTaskDelay(10 / portTICK_PERIOD_MS);
+//		vTaskDelay(10 / portTICK_PERIOD_MS);
 
 		if (counter++ > 250) // 250 - ???
 			break;
@@ -554,8 +563,8 @@ static void http_meteo_to_file(void)
 	fclose(file);
 
 	file_error:
-
 	esp_http_client_cleanup(client);
+	http_open_error:
 	free(url);
 	free(response_buffer);
 }
@@ -628,31 +637,35 @@ static bool service_weather_parse_meteo_data(void)
 //	}
 //}
 
-void weather_service_task(void *pvParameters)
+void service_weather_update(void)
+{
+	counter = COUNTER_WEATHER;
+}
+
+void service_weather_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 
 	check_meteo_conf_file();
-	read_meteo_conf();
+	service_weather_read_conf();
 
-	uint16_t counter = COUNTER_WEATHER;
 
 	for( ;; )
 	{
-		if (glob_get_status_err())
+//		printf("Wheather from core %d!\n", xPortGetCoreID() );
+
+		if (glob_get_status_err() || (glob_get_update_reg() & UPDATE_NOW))
 			break;
 
-		if (glob_get_update_reg() & UPDATE_NOW)
-			break;
-
-		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
+		if ( !(glob_get_status_reg() & STATUS_IP_GOT)
+				|| !(glob_get_status_reg() & STATUS_METEO_ON))
 			goto for_end;
 
 		if (glob_get_status_reg() & STATUS_METEO_CITY_SEARCH)
 			http_city_search();
 
-		if (!(glob_get_status_reg() & STATUS_METEO_ON)) // && (glob_get_status_reg() & STATUS_TIME_SYNC)))
-			goto for_end;
+		//		if (!(glob_get_status_reg() & STATUS_METEO_ON)) // && (glob_get_status_reg() & STATUS_TIME_SYNC)))
+		//			goto for_end;
 
 		if (glob_get_status_reg() & STATUS_METEO_UPDATE_NOW)
 		{
@@ -660,7 +673,7 @@ void weather_service_task(void *pvParameters)
 			counter = COUNTER_WEATHER;
 		}
 
-		if (counter++ < COUNTER_WEATHER)
+		if (++counter < COUNTER_WEATHER)
 			goto for_end;
 
 		counter = 0;

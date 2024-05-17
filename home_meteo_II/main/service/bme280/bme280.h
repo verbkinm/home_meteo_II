@@ -15,10 +15,10 @@
 #include "Local_Lib/local_lvgl_lib.h"
 #include "I2C/BME280.h"
 
-void BME280_service_task(void *pvParameters);
-const struct THP *BME280_service_get_value(void);
-const struct THP *BME280_service_get_value_without_calibration(void);
+void service_BME280_task(void *pvParameters);
+const struct THP *service_BME280_get_value(void);
+const struct THP *service_BME280_get_value_without_calibration(void);
 
-void BME280_service_save_calibrations(void);
+void service_BME280_save_calibrations(void);
 
 #endif /* MAIN_SERVICE_BME280_BME280_H_ */

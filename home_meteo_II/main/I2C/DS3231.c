@@ -7,6 +7,8 @@
 
 #include "DS3231.h"
 
+#include "iotv.h"
+
 static const char *TAG = "DS3132";
 
 struct DateTime DS3231_DataTime(void)
@@ -90,4 +92,15 @@ void DS3231_set_system_time(void)
 	now = mktime(&timeinfo);
 	struct timeval tv = {.tv_sec = now};
 	settimeofday(&tv, NULL);
+}
+
+void DS3231_set_iotv_time(void)
+{
+	const struct IOTV_Server_embedded *iot = iotv_get();
+
+	time_t t = *(time_t *)iot->readChannel[CH_DATE_TIME].data;
+	struct tm *tm_t = localtime(&t);
+
+	DS3231_SetDataTime_tm(tm_t);
+	DS3231_set_system_time();
 }

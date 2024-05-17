@@ -9,17 +9,19 @@
 
 const char *TAG = "SNTP";
 
-char *sntp_utc;
-char *sntp_server_url;
+static char *sntp_utc;
+static char *sntp_server_url;
 
-const char *sntp_utc_default = "UTC-3";
-const char *sntp_server_url_default = "pool.ntp.org";
+static const char *sntp_utc_default = "UTC-3";
+static const char *sntp_server_url_default = "pool.ntp.org";
+
+static uint16_t counter = COUNTER_SNTP;
 
 static void check_sntp_conf_file(void);
 
-void time_sync_notification_cb(struct timeval *tv);
+static void time_sync_notification_cb(struct timeval *tv);
 
-void time_sync_notification_cb(struct timeval *tv)
+static void time_sync_notification_cb(struct timeval *tv)
 {
 	glob_set_bits_status_reg(STATUS_TIME_SYNC);
 
@@ -32,7 +34,7 @@ void time_sync_notification_cb(struct timeval *tv)
 	tzset();
 	localtime_r(&now, &timeinfo);
 	strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-//	ESP_LOGI(TAG, "The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
+	//	ESP_LOGI(TAG, "The current date/time in %s is: %s\n", sntp_utc, strftime_buf);
 
 	DS3231_SetDataTime_tm(&timeinfo);
 }
@@ -69,7 +71,7 @@ static void check_sntp_conf_file(void)
 	cJSON_Delete(root);
 }
 
-void read_sntp_conf(void)
+void service_sntp_read_conf(void)
 {
 	char *on = NULL;
 
@@ -89,7 +91,7 @@ void read_sntp_conf(void)
 		sntp_server_url = (char *)sntp_server_url_default;
 }
 
-void sntp_obtain_time(void)
+void service_sntp_obtain_time(void)
 {
 	esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG(sntp_server_url);
 	config.sync_cb = time_sync_notification_cb;
@@ -102,49 +104,69 @@ void sntp_obtain_time(void)
 	esp_netif_sntp_deinit();
 }
 
-void sntp_service_task(void *pvParameters)
+const char *service_sntp_utc(void)
+{
+	return sntp_utc;
+}
+
+const char *service_sntp_url(void)
+{
+	return sntp_server_url;
+}
+
+void service_sntp_update(void)
+{
+	counter = COUNTER_SNTP;
+}
+
+void service_sntp_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 
 	check_sntp_conf_file();
-	read_sntp_conf();
+	service_sntp_read_conf();
 
 	time_t now;
 	struct tm timeinfo;
 
 	while(true)
 	{
-		if (glob_get_status_err())
+		//		printf("SNTP from core %d!\n", xPortGetCoreID() );
+
+		if (glob_get_status_err()
+				|| (glob_get_update_reg() & UPDATE_NOW))
 			break;
 
-		if (glob_get_update_reg() & UPDATE_NOW)
-			break;
-
-		if ( !(glob_get_status_reg() & STATUS_SNTP_ON) || !(glob_get_status_reg() & STATUS_IP_GOT) )
+		if ( !(glob_get_status_reg() & STATUS_SNTP_ON)
+				|| !(glob_get_status_reg() & STATUS_IP_GOT) )
 			goto for_end;
 
-		read_sntp_conf();
+		service_sntp_read_conf();
 
-		time(&now);
-		localtime_r(&now, &timeinfo);
-		sntp_obtain_time();
-		time(&now);
-
-		// Set timezone
-		setenv("TZ", sntp_utc, 1);
-		tzset();
-		localtime_r(&now, &timeinfo);
-
-		if (sntp_get_sync_mode() == SNTP_SYNC_MODE_SMOOTH)
+		if (++counter > COUNTER_SNTP)
 		{
-			struct timeval outdelta;
-			while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS)
+			counter = 0;
+
+			time(&now);
+			localtime_r(&now, &timeinfo);
+			service_sntp_obtain_time();
+			time(&now);
+
+			// Set timezone
+			setenv("TZ", sntp_utc, 1);
+			tzset();
+			localtime_r(&now, &timeinfo);
+
+			if (sntp_get_sync_mode() == SNTP_SYNC_MODE_SMOOTH)
 			{
-				adjtime(NULL, &outdelta);
-				vTaskDelay(2000 / portTICK_PERIOD_MS);
+				struct timeval outdelta;
+				while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS)
+				{
+					adjtime(NULL, &outdelta);
+					vTaskDelay(2000 / portTICK_PERIOD_MS);
+				}
 			}
 		}
-		vTaskDelay(1000 * (1 * 60) / portTICK_PERIOD_MS); // раз в 1 минуту
 
 		for_end:
 		vTaskDelay(1000 / portTICK_PERIOD_MS);

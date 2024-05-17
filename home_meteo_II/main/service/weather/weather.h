@@ -70,12 +70,15 @@ typedef struct Open_Meteo_City {
     float longitude;
 } open_meteo_city_t;
 
-void weather_service_task(void *pvParameters);
+void service_weather_task(void *pvParameters);
 void service_weather_set_city(const char* city);
 const char *service_weather_get_city(void);
 const open_meteo_data_t *service_weather_get_current_meteo_data(void);
 const open_meteo_data_t *service_weather_get_meteo_data(void);
 
 void service_weather_get_range(open_meteo_data_t *ret_min, open_meteo_data_t *ret_max);
+
+void service_weather_read_conf(void);
+void service_weather_update(void);
 
 #endif /* MAIN_SERVICE_WEATHER_WEATHER_H_ */

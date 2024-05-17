@@ -25,6 +25,7 @@
 #include "screen_page/setting/display/display.h"
 #include "screen_page/setting/update/update.h"
 #include "screen_page/setting/sensors/sensors.h"
+#include "screen_page/setting/remote_sensors/remote_sensors.h"
 #include "screen_page/setting/sd/sd.h"
 #include "TFT_touchscreen/TFT_touch_screen.h"
 #include "screen_page/page.h"

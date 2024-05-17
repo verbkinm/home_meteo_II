@@ -16,7 +16,7 @@ static void timer_handler(lv_timer_t *timer);
 
 static void timer_handler(lv_timer_t *timer)
 {
-	const struct THP *thp = BME280_service_get_value();
+	const struct THP *thp = service_BME280_get_value();
 
 	my_bar_set_value(bar_t, thp->temperature);
 	my_bar_set_value(bar_h, thp->humidity);

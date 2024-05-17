@@ -206,7 +206,7 @@ static void wifi_switch_heandler(lv_event_t *e)
 		lv_event_send(wifi_page_obj->btn_scan, LV_EVENT_CLICKED, 0);
 		glob_set_bits_status_reg(STATUS_WIFI_STA_START);
 
-		bool res = set_wifi_config_value("on", "1");
+		bool res = set_wifi_config_value(ON_STR, "1");
 		if (!res)
 			printf("on not write\n");
 
@@ -219,7 +219,7 @@ static void wifi_switch_heandler(lv_event_t *e)
 		lv_obj_add_state(wifi_page_obj->btn_scan, LV_STATE_DISABLED);
 		glob_clear_bits_status_reg(STATUS_WIFI_STA_START);
 
-		bool res = set_wifi_config_value("on", "0");
+		bool res = set_wifi_config_value(ON_STR, "0");
 		if (!res)
 			printf("on not write\n");
 	}
@@ -361,7 +361,7 @@ static void wifi_connect_step1(lv_event_t *e)
 
 static void wifi_disconnect_handler(lv_event_t * e)
 {
-	set_wifi_config_value("auto", "0");
+	set_wifi_config_value(AUTO_STR, "0");
 	glob_clear_bits_status_reg(STATUS_WIFI_AUTOCONNECT);
 	esp_wifi_disconnect();
 }

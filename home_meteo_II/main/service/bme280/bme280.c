@@ -71,7 +71,7 @@ static void read_conf(void)
 	}
 }
 
-void BME280_service_save_calibrations(void)
+void service_BME280_save_calibrations(void)
 {
 	char buf[BUFSIZ] = {0};
 
@@ -85,17 +85,17 @@ void BME280_service_save_calibrations(void)
 	set_bme280_config_value(THP_P_CALIB_STR, buf);
 }
 
-const struct THP *BME280_service_get_value(void)
+const struct THP *service_BME280_get_value(void)
 {
 	return &thp;
 }
 
-const struct THP *BME280_service_get_value_without_calibration(void)
+const struct THP *service_BME280_get_value_without_calibration(void)
 {
 	return &thp_without_calibration;
 }
 
-void BME280_service_task(void *pvParameters)
+void service_BME280_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 

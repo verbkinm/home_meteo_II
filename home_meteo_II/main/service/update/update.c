@@ -20,8 +20,7 @@ static char *url_update = NULL;
 static char available_version[64];
 
 static void check_update_conf_file(void);
-static void read_update_conf(void);
-static void chek_update(void);
+static esp_err_t chek_update(void);
 static void update(void);
 static bool parse_http_response(const char* content);
 
@@ -65,7 +64,7 @@ static void check_update_conf_file(void)
 	cJSON_Delete(root);
 }
 
-static void read_update_conf(void)
+void service_update_read_conf(void)
 {
 	char *buf = NULL;
 	if (get_update_config_value(NOTIFICATION_STR, &buf))
@@ -139,8 +138,9 @@ static bool parse_http_response(const char* content)
 	return false;
 }
 
-static void chek_update(void)
+static esp_err_t chek_update(void)
 {
+	glob_set_bits_update_reg(UPDATE_CHECK);
 //	ESP_LOGI(TAG, "check update");
 	esp_http_client_config_t config = {
 			.url = url_update_info,
@@ -149,7 +149,9 @@ static void chek_update(void)
 	};
 
 	esp_http_client_handle_t client = esp_http_client_init(&config);
-	esp_http_client_open(client, 0);
+	if (esp_http_client_open(client, 0 != ESP_OK))
+			return ESP_FAIL;
+
 	esp_http_client_fetch_headers(client);
 
 	char *response_buffer = calloc(1, BUFSIZE);
@@ -160,6 +162,8 @@ static void chek_update(void)
 	esp_http_client_cleanup(client);
 
 	glob_clear_bits_update_reg(UPDATE_CHECK);
+
+	return ESP_OK;
 }
 
 static void update(void)
@@ -174,17 +178,17 @@ static void update(void)
 	glob_clear_bits_update_reg(UPDATE_NOW);
 }
 
-char *update_service_get_available_version(void)
+char *service_update_get_available_version(void)
 {
 	return available_version;
 }
 
-void update_service_task(void *pvParameters)
+void service_update_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 
 	check_update_conf_file();
-	read_update_conf();
+	service_update_read_conf();
 
 	strcpy(available_version, default_version);
 
@@ -192,10 +196,12 @@ void update_service_task(void *pvParameters)
 
 	for( ;; )
 	{
+//		printf("Update from core %d!\n", xPortGetCoreID() );
+
 		if (glob_get_status_err())
 			break;
 
-		if ( !(glob_get_status_reg() & STATUS_IP_GOT))
+		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
 			goto for_end;
 
 		if (glob_get_update_reg() & UPDATE_NOW)
@@ -206,15 +212,19 @@ void update_service_task(void *pvParameters)
 
 		// Проверить версию доступного обновления. Запускается из Настройки - Обновления
 		if (glob_get_update_reg() & UPDATE_CHECK)
-			chek_update();
+		{
+			if (chek_update() != ESP_OK)
+				counter = COUNTER_CHECK_UPDATE;
+		}
 
 		// Фоновая проверка нового обновления. В lvgl потоке будет показано сообщение, если есть новая версия обновления
 		if (glob_get_update_reg() & UPDATE_NOTIFICATION)
 		{
-			if (counter++ > COUNTER_CHECK_UPDATE)
+			if (++counter > COUNTER_CHECK_UPDATE)
 			{
 				counter = 0;
-				chek_update();
+				if (chek_update() != ESP_OK)
+					counter = COUNTER_CHECK_UPDATE;
 				if (glob_get_update_reg() & UPDATE_AVAILABLE)
 					glob_set_bits_update_reg(UPDATE_MESSAGE);
 			}

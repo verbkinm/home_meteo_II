@@ -11,7 +11,7 @@
 #include <sys/time.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
-//#include "time.h"
+#include "time.h"
 
 #include "Global_def.h"
 #include "Local_Lib/local_lib.h"
@@ -35,5 +35,6 @@ void DS3231_SetDataTime(const struct DateTime *dt);
 void DS3231_SetDataTime_tm(const struct tm *t);
 
 void DS3231_set_system_time(void);
+void DS3231_set_iotv_time(void); // Установить время из iotv
 
 #endif /* MAIN_I2C_DS3231_H_ */

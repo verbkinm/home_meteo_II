@@ -3,7 +3,66 @@
 
 // Отложенный запуск сервисов
 
-#define DELAYED_LAUNCH						10000
+#define DELAYED_LAUNCH						0//10000
+
+// IOTV
+#define CH_SENSOR_LOCAL_T					0
+#define CH_SENSOR_LOCAL_H					1
+#define CH_SENSOR_LOCAL_P					2
+
+#define CH_SENSOR_REMOTE_0_T				3
+#define CH_SENSOR_REMOTE_0_H				4
+#define CH_SENSOR_REMOTE_0_P				5
+#define CH_SENSOR_REMOTE_0_B				6
+#define CH_SENSOR_REMOTE_0_L				7
+
+#define CH_SENSOR_REMOTE_1_T				8
+#define CH_SENSOR_REMOTE_1_H				9
+#define CH_SENSOR_REMOTE_1_P				10
+#define CH_SENSOR_REMOTE_1_B				11
+#define CH_SENSOR_REMOTE_1_L				12
+
+#define CH_DATE_TIME						13
+
+#define CH_WIFI_STA_ENABLE					14
+#define CH_WIFI_STA_HOSTNAME				15
+#define CH_WIFI_STA_PWD						16
+#define CH_WIFI_STA_AUTOCON					17
+#define CH_WIFI_STA_META					18
+
+#define CH_DSIPLAY_ROTATE					19
+#define CH_DSIPLAY_BRIGHTNESS				20
+#define CH_DSIPLAY_NIGHT_MODE				21
+#define CH_DSIPLAY_DAY_BRIGHTNESS			22
+#define CH_DSIPLAY_NIGHT_BRIGHTNESS			23
+#define CH_DSIPLAY_DAY_START				24
+#define CH_DSIPLAY_NIGHT_START				25
+
+#define CH_SNTP_ENABLE						26
+#define CH_SNTP_UCT							27
+#define CH_SNTP_URL							28
+
+#define CH_UPDATE_ENABLE					29
+#define CH_UPDATE_INTERVAL					30
+#define CH_UPDATE_URL						31
+#define CH_UPDATE_VERSION					32
+#define CH_UPDATE_NEW_VERSION				33
+
+#define CH_METEO_ENABLE						34
+#define CH_METEO_CITY						35
+#define CH_METEO_LATITUDE					36
+#define CH_METEO_LONGITUDE					37
+
+#define CH_IOTV_SERVER_HOSTNAME				38
+#define CH_IOTV_SERVER_TCP_PORT				39
+
+#define CH_SD_META							40
+
+#define CH_EXT_CUR_PAGE						41
+#define CH_EXT_REBOOT						42
+#define CH_EXT_UPDATE_SNTP					43
+#define CH_EXT_UPDATE_METEO					44
+#define CH_EXT_UPDATE_UPDATE				45
 
 // TCP
 #define PORT                        		8888
@@ -21,10 +80,6 @@
 #define I2C_MASTER_TX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_RX_BUF_DISABLE   		0                          /*!< I2C master doesn't need buffer */
 #define I2C_MASTER_TIMEOUT_MS      			1000
-
-// P3
-//#define	P3_VCC								GPIO_NUM_17
-//#define	P3_GND								GPIO_NUM_18
 
 // Адреса i2c устройств
 #define BME280_ADDR                			0x76
@@ -156,9 +211,10 @@ enum STATUS_REG {
 	STATUS_METEO_ON = 0x0100,
 	STATUS_METEO_CITY_SEARCH = 0x0200,
 	STATUS_METEO_CITY_SEARCH_DONE = 0x0400,
-	STATUS_METEO_UPDATE_NOW = 0x0800,
+	STATUS_METEO_UPDATE_NOW = 0x0800,		// Обновить данные погоды сейчас. Вызывается через GUI из меню настроек
 	STATUS_DISPLAY_NIGHT_MODE_ON = 0x1000,
 	STATUS_TIME_SYNC = 0x2000,
+	STATUS_WIFI_AP_START = 0x4000,				// была поднята wifi станция
 };
 
 // Глобалные флаги ошибок
@@ -171,12 +227,12 @@ enum STATUS_ERROR {
 
 enum UPDATE_FLAGS {
 	UPDATE_NOW = 0x01,
-	UPDATE_CHECK = 0x02,
+	UPDATE_CHECK = 0x02,			// Проверить сейчас наличие обновлений
 	UPDATE_AVAILABLE = 0x04,
 	UPDATE_DONE = 0x08,
 	UPDATE_MESSAGE = 0x10,
 	UPDATE_MESSAGE_NOW = 0x20,
-	UPDATE_NOTIFICATION = 0x40,
+	UPDATE_NOTIFICATION = 0x40,		// Уведомлять на экране о новых обновлениях
 };
 
 // Повторяющиеся строки текста в коде
@@ -207,6 +263,7 @@ enum UPDATE_FLAGS {
 #define AUTO_STR				 "auto"
 #define SNTP_STR				 "sntp"
 #define UTC_STR					 "utc"
+#define CITY_STR				 "city"
 
 #define HOURLY_STR				 "hourly"
 #define TIME_STR				 "time"
@@ -226,12 +283,13 @@ enum UPDATE_FLAGS {
 #define ATTENTION_STR 			 "Внимание!"
 #define ERROR_STR 				 "Ошибка!"
 #define SAVE_STR 				 "Сохранить"
+#define UPDATE_RU_STR			 "Обновить"
 #define CANCEL_STR 				 "Отмена"
 #define YES_STR 				 "Да"
 #define NO_STR 					 "Нет"
 #define RESET_STR				 "Сбросить"
 #define HG_STR					 "мм рт.ст."
-#define CITY_STR				 "city"
+
 
 #define METEO_STR				 "meteo"
 #define ON_STR					 "on"
@@ -246,8 +304,9 @@ enum UPDATE_FLAGS {
 #define CANT_REMOVE_FILE_TMPLT	"%s can't remove \"%s\" file!\n"
 
 // Константы
-#define COUNTER_WEATHER			(60 * 15) // раз в 15 минут
-#define COUNTER_CHECK_UPDATE 	(60 * 60) // раз в 1 час
+#define COUNTER_WEATHER			(60 * 15) 	// раз в 15 минут
+#define COUNTER_CHECK_UPDATE 	(60 * 60) 	// раз в 1 час
+#define COUNTER_SNTP			(60 * 1) 	// раз в 1 минуту
 
 
 #endif /* MAIN_GLOBAL_DEF_H_ */
