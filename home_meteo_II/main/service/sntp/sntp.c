@@ -8,6 +8,7 @@
 #include "sntp.h"
 
 const char *TAG = "SNTP";
+const static char *task_name = "sntp_task";
 
 static char *sntp_utc;
 static char *sntp_server_url;
@@ -42,17 +43,31 @@ static void time_sync_notification_cb(struct timeval *tv)
 static void check_sntp_conf_file(void)
 {
 	cJSON *root = cJSON_CreateObject();
+	if (root == NULL)
+		return;
 
 	cJSON *sntp = cJSON_CreateObject();
+	if (sntp == NULL)
+		goto end;
+
 	cJSON_AddItemToObjectCS(root, SNTP_STR, sntp);
 
 	cJSON *on_obj = cJSON_CreateString("0");
+	if (on_obj == NULL)
+		goto end;
+
 	cJSON_AddItemToObject(sntp, ON_STR, on_obj);
 
 	cJSON *utc_obj = cJSON_CreateString("UTC-3");
+	if (utc_obj == NULL)
+		goto end;
+
 	cJSON_AddItemToObjectCS(sntp, UTC_STR, utc_obj);
 
 	cJSON *url_obj = cJSON_CreateString(sntp_server_url_default);
+	if (url_obj == NULL)
+		goto end;
+
 	cJSON_AddItemToObjectCS(sntp, URL_STR, url_obj);
 
 	get_sntp_config_value(ON_STR, &on_obj->valuestring);
@@ -68,6 +83,7 @@ static void check_sntp_conf_file(void)
 		fclose(file);
 	}
 
+	end:
 	cJSON_Delete(root);
 }
 
@@ -122,6 +138,7 @@ void service_sntp_update(void)
 void service_sntp_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+	printf("%s %s start\n", TAG, task_name);
 
 	check_sntp_conf_file();
 	service_sntp_read_conf();

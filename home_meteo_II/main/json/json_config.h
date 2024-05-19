@@ -36,6 +36,9 @@ bool get_meteo_chart_config_value(const char *key, char **value);
 bool set_bme280_config_value(const char *key, const char *value);
 bool get_bme280_config_value(const char *key, char **value);
 
+bool set_iotv_config_value(const char *key, const char *value);
+bool get_iotv_config_value(const char *key, char **value);
+
 bool set_update_config_value(const char *key, const char *value);
 bool get_update_config_value(const char *key, char **value);
 

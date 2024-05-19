@@ -196,6 +196,7 @@
 #define METEO_WEEK_PATH		 "/sdcard/week.json"
 #define UPDATE_PATH			 "/sdcard/update.json"
 #define SENSORS_PATH		 "/sdcard/sensors.json"
+#define IOTV_PATH		 	 "/sdcard/iotv.json"
 #define TMP_FILE_TXT         "/sdcard/tmp.txt"
 
 // Глобалные флаги статусов
@@ -250,6 +251,9 @@ enum UPDATE_FLAGS {
 #define THP_T_CALIB_STR			 "t_calib"
 #define THP_H_CALIB_STR			 "h_calib"
 #define THP_P_CALIB_STR			 "p_calib"
+
+#define IOTV_STR			 	 "iotv"
+#define PORT_STR			 	 "port"
 
 #define NOTIFICATION_STR		 "notification"
 #define UPDATE_STR				 "update"

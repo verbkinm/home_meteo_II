@@ -14,8 +14,8 @@ static uint64_t realBufSize = 0;
 
 static const char *TAG = "iotv";
 
-static char recivedBuffer[BUFSIZE];
-static char transmitBuffer[BUFSIZE];
+static char recivedBuffer[BUFSIZE * 5];
+static char transmitBuffer[BUFSIZE * 5];
 
 static int last_client_socket = 0;
 
@@ -217,7 +217,7 @@ void iotv_data_recived(const char *data, int size, int sock)
 	if ((realBufSize + size) >= BUFSIZE)
 	{
 		iotv_clear_buf_data();
-		printf("%s Buffer overflow\n", TAG);
+		printf("%s Buffer overflow. Size = %llu\n", TAG, realBufSize + size);
 		return;
 	}
 
