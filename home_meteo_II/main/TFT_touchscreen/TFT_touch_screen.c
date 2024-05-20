@@ -189,7 +189,7 @@ static void TFT_rgb_panel_init(void)
 	ESP_ERROR_CHECK(ledc_channel_config(&ledc_channel));
 	ledc_fade_func_install(0);
 
-	set_display_brightness(255);
+	TFT_set_display_brightness(255);
 }
 
 static void TFT_touch_panel_init(void)
@@ -233,20 +233,25 @@ void TFT_init(void)
 	TFT_touch_panel_init();
 }
 
-void rotate_display(lv_disp_rot_t rotation)
+void TFT_set_display_rotate(lv_disp_rot_t rotation)
 {
 	lv_disp_set_rotation(disp, rotation);
 }
 
-lv_disp_rot_t get_rotate_display(void)
+lv_disp_rot_t TFT_get_display_rotate(void)
 {
 	return lv_disp_get_rotation(disp);
 }
 
-void set_display_brightness(uint8_t value)
+void TFT_set_display_brightness(uint8_t value)
 {
 	value = inRange(value, 2, 255);
 
 	ESP_ERROR_CHECK(ledc_set_duty(LEDC_MODE, LEDC_CHANNEL, value));
 	ESP_ERROR_CHECK(ledc_update_duty(LEDC_MODE, LEDC_CHANNEL));
+}
+
+uint8_t TFT_get_display_brightness(void)
+{
+	return ledc_get_duty(LEDC_MODE, LEDC_CHANNEL);
 }

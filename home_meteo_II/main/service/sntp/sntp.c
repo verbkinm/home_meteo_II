@@ -10,16 +10,15 @@
 const char *TAG = "SNTP";
 const static char *task_name = "sntp_task";
 
-static char *sntp_utc;
-static char *sntp_server_url;
-
 static const char *sntp_utc_default = "UTC-3";
 static const char *sntp_server_url_default = "pool.ntp.org";
+
+static char *sntp_utc = NULL;
+static char *sntp_server_url = NULL;
 
 static uint16_t counter = COUNTER_SNTP;
 
 static void check_sntp_conf_file(void);
-
 static void time_sync_notification_cb(struct timeval *tv);
 
 static void time_sync_notification_cb(struct timeval *tv)
@@ -100,11 +99,26 @@ void service_sntp_read_conf(void)
 		free(on);
 	}
 
+	if (sntp_utc != NULL)
+		free(sntp_utc);
+
 	if (!get_sntp_config_value(UTC_STR, &sntp_utc))
-		sntp_utc = (char *)sntp_utc_default;
+	{
+		size_t size = sizeof(sntp_utc_default);
+		sntp_utc = calloc(1, size + 1);
+		memcpy(sntp_utc, sntp_utc_default, size);
+	}
+
+
+	if (sntp_server_url != NULL)
+		free(sntp_server_url);
 
 	if (!get_sntp_config_value(URL_STR, &sntp_server_url))
-		sntp_server_url = (char *)sntp_server_url_default;
+	{
+		size_t size = sizeof(sntp_server_url_default);
+		sntp_utc = calloc(1, size + 1);
+		memcpy(sntp_server_url, sntp_server_url_default, size);
+	}
 }
 
 void service_sntp_obtain_time(void)

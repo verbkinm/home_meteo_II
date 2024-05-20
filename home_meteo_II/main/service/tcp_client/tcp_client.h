@@ -17,6 +17,9 @@ void service_tcp_client_task(void *pvParameters);
 void service_tcp_client_read_conf(void);
 
 void service_tcp_client_set_url(const char* url);
-void service_tcp_client_set_port(uint64_t port);
+void service_tcp_client_set_port(uint16_t port);
+
+const char *service_tcp_client_get_url(void);
+uint16_t service_tcp_client_get_port(void);
 
 #endif /* MAIN_SERVICE_TCP_CLIENT_TCP_CLIENT_H_ */

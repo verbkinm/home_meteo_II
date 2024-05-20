@@ -14,6 +14,11 @@ static void read_display_conf(void);
 
 service_display_t display_service_data;
 
+const service_display_t *service_display_conf(void)
+{
+	return &display_service_data;
+}
+
 void service_display_read_conf(void)
 {
 	read_display_conf();
@@ -49,13 +54,13 @@ void service_display_task(void *pvParameters)
 			{
 				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_night, 1000);
 				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
-				set_display_brightness(display_service_data.brightness_night);
+				TFT_set_display_brightness(display_service_data.brightness_night);
 			}
 			else
 			{
 				ledc_set_fade_with_time(LEDC_MODE, LEDC_CHANNEL, display_service_data.brightness_day, 1000);
 				ledc_fade_start(LEDC_MODE, LEDC_CHANNEL, LEDC_FADE_NO_WAIT);
-				set_display_brightness(display_service_data.brightness_day);
+				TFT_set_display_brightness(display_service_data.brightness_day);
 			}
 		}
 
@@ -70,9 +75,9 @@ static void read_display_conf(void)
 	if (get_display_config_value(ROTATE_STR, &buf) && buf != NULL)
 	{
 		if (strcmp(buf, "1") == 0)
-			rotate_display(LV_DISP_ROT_180);
+			TFT_set_display_rotate(LV_DISP_ROT_180);
 		else
-			rotate_display(LV_DISP_ROT_NONE);
+			TFT_set_display_rotate(LV_DISP_ROT_NONE);
 
 		free(buf);
 	}
@@ -83,7 +88,7 @@ static void read_display_conf(void)
 		sscanf(buf, "%d", &value);
 		free(buf);
 		value = inRange(value, 2, 255);
-		set_display_brightness(value);
+		TFT_set_display_brightness(value);
 		display_service_data.brightnes = value;
 	}
 

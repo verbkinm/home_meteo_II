@@ -23,7 +23,7 @@
 
 void service_update_task(void *pvParameters);
 
-char *service_update_get_available_version(void);
+const char *service_update_get_available_version(void);
 void service_update_read_conf(void);
 
 #endif /* MAIN_SERVICE_UPDATE_UPDATE_H_ */

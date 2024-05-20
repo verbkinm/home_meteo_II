@@ -40,7 +40,7 @@ static void update_check_handler(lv_event_t *e)
 		return;
 	}
 
-	busy_ind = create_busy_indicator(lv_obj_get_child(lv_scr_act(), 1), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
+	//	busy_ind = create_busy_indicator(lv_obj_get_child(lv_scr_act(), 1), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
 	glob_set_bits_update_reg(UPDATE_CHECK);
 }
 
@@ -84,6 +84,9 @@ static void timer_loop(lv_timer_t *timer)
 	if ( !(glob_get_update_reg() & UPDATE_CHECK) && busy_ind != NULL)
 		clear_busy_indicator(&busy_ind);
 
+	if ( (glob_get_update_reg() & UPDATE_CHECK) && busy_ind == NULL)
+		busy_ind = create_busy_indicator(lv_obj_get_child(lv_scr_act(), 1), LCD_H_RES, LCD_V_RES - LCD_PANEL_STATUS_H, 100, 100, LV_OPA_70);
+
 	lv_label_set_text_fmt(new_version_lbl, "%s %s", new_version_str, service_update_get_available_version());
 
 	if (glob_get_update_reg() & UPDATE_AVAILABLE)
@@ -100,11 +103,11 @@ static void switcher_handler(lv_event_t *e)
 	if (lv_obj_has_state(switcher_update_notification, LV_STATE_CHECKED))
 	{
 		ret = set_update_config_value("notification", "1");
-		glob_set_bits_update_reg(UPDATE_NOTIFICATION);
+		glob_set_bits_update_reg(UPDATE_ON);
 	}
 	else
 	{
-		glob_clear_bits_update_reg(UPDATE_NOTIFICATION);
+		glob_clear_bits_update_reg(UPDATE_ON);
 		ret = set_update_config_value("notification", "0");
 	}
 
@@ -120,7 +123,7 @@ void create_update_sub_page(lv_event_t *e)
 	lv_obj_t *section = lv_menu_section_create(sub_update_page);
 
 	// Вкл./Выкл. оповещение о новых обновлениях
-	create_switch(section, LV_SYMBOL_SETTINGS, "Оповещать о новых обновлениях", (glob_get_update_reg() & UPDATE_NOTIFICATION), &switcher_update_notification);
+	create_switch(section, LV_SYMBOL_SETTINGS, "Оповещать о новых обновлениях", (glob_get_update_reg() & UPDATE_ON), &switcher_update_notification);
 	lv_obj_add_event_cb(switcher_update_notification, switcher_handler, LV_EVENT_CLICKED, 0);
 
 	const esp_app_desc_t *esp_app = esp_app_get_description();

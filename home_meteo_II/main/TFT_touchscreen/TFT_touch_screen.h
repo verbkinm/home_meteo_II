@@ -20,8 +20,11 @@
 #include "Local_Lib/local_lib.h"
 
 void TFT_init(void);
-void rotate_display(lv_disp_rot_t rotation);
-lv_disp_rot_t get_rotate_display(void);
-void set_display_brightness(uint8_t value);
+
+void TFT_set_display_rotate(lv_disp_rot_t rotation);
+lv_disp_rot_t TFT_get_display_rotate(void);
+
+void TFT_set_display_brightness(uint8_t value);
+uint8_t TFT_get_display_brightness(void);
 
 #endif /* MAIN_TFT_TOUCH_SCREEN_H_ */

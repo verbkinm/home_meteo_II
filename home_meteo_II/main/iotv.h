@@ -19,7 +19,7 @@
 //#include "I2C/VL6180X_Simple.h"
 //#include "nvs/local_nvs.h"
 
-esp_err_t iotv_init(void);
+void service_iotv_task(void *pvParameters);
 void iotv_data_recived(const char *data, int size, int sock);
 
 void iotv_clear_buf_data(void);

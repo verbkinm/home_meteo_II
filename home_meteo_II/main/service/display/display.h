@@ -34,4 +34,6 @@ typedef struct Service_display service_display_t;
 void service_display_task(void *pvParameters);
 void service_display_read_conf(void);
 
+const service_display_t *service_display_conf(void);
+
 #endif /* MAIN_SERVICE_DISPLAY_DISPLAY_H_ */

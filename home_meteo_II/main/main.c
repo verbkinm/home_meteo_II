@@ -19,8 +19,6 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
-	iotv_init();
-
 	sd_spi_init();
 
 	i2c_init();

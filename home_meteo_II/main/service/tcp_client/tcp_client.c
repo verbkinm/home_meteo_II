@@ -20,7 +20,7 @@
 
 #include "iotv.h"
 
-const static char *default_iotv_host = "192.168.1.13";
+const static char *default_iotv_host = "192.168.40.216";
 const static uint16_t default_iotv_tcp_port = 2023;
 
 static char *iotv_host = NULL;
@@ -77,7 +77,7 @@ static void tcp_client_run()
 //                break;
 //            }
 
-            int len = recv(sock, rx_buffer, sizeof(rx_buffer), 0);
+            int len = recv(sock, rx_buffer, BUFSIZE - 1, 0);
             // Error occurred during receiving
             if (len < 0) {
                 ESP_LOGE(TAG, "recv failed: errno %d = %s", errno, strerror(errno));
@@ -86,7 +86,7 @@ static void tcp_client_run()
             // Data received
             else
             {
-            	iotv_data_recived(rx_buffer, BUFSIZE, sock);
+            	iotv_data_recived(rx_buffer, len, sock);
             }
 
 //            taskYIELD();
@@ -178,7 +178,7 @@ void service_tcp_client_task(void *pvParameters)
 		if (glob_get_status_err())
 			break;
 
-		if (glob_get_status_reg() & STATUS_WIFI_AP_START)
+		if ((glob_get_status_reg() & STATUS_IP_GOT) && (iotv_get()->state == 1))
 			tcp_client_run();
 
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -188,10 +188,24 @@ void service_tcp_client_task(void *pvParameters)
 
 void service_tcp_client_set_url(const char* url)
 {
-
+	set_iotv_config_value(URL_STR, url);
+	service_tcp_client_read_conf();
 }
 
-void service_tcp_client_set_port(uint64_t port)
+void service_tcp_client_set_port(uint16_t port)
 {
+	char portStr[6] = {0};
+	snprintf(portStr, 5, "%hu", port);
+	set_iotv_config_value(PORT_STR, portStr);
+	service_tcp_client_read_conf();
+}
 
+const char *service_tcp_client_get_url(void)
+{
+	return iotv_host;
+}
+
+uint16_t service_tcp_client_get_port(void)
+{
+	return iotv_port;
 }

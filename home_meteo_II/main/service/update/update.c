@@ -70,7 +70,7 @@ void service_update_read_conf(void)
 	if (get_update_config_value(NOTIFICATION_STR, &buf))
 	{
 		if (strcmp(buf, "1") == 0)
-			glob_set_bits_update_reg(UPDATE_NOTIFICATION);
+			glob_set_bits_update_reg(UPDATE_ON);
 		free(buf);
 	}
 
@@ -178,7 +178,7 @@ static void update(void)
 	glob_clear_bits_update_reg(UPDATE_NOW);
 }
 
-char *service_update_get_available_version(void)
+const char *service_update_get_available_version(void)
 {
 	return available_version;
 }
@@ -218,7 +218,7 @@ void service_update_task(void *pvParameters)
 		}
 
 		// Фоновая проверка нового обновления. В lvgl потоке будет показано сообщение, если есть новая версия обновления
-		if (glob_get_update_reg() & UPDATE_NOTIFICATION)
+		if (glob_get_update_reg() & UPDATE_ON)
 		{
 			if (++counter > COUNTER_CHECK_UPDATE)
 			{

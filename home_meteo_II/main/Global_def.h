@@ -233,7 +233,7 @@ enum UPDATE_FLAGS {
 	UPDATE_DONE = 0x08,
 	UPDATE_MESSAGE = 0x10,
 	UPDATE_MESSAGE_NOW = 0x20,
-	UPDATE_NOTIFICATION = 0x40,		// Уведомлять на экране о новых обновлениях
+	UPDATE_ON = 0x40,				// Уведомлять на экране о новых обновлениях
 };
 
 // Повторяющиеся строки текста в коде

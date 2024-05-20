@@ -1,5 +1,7 @@
 #include "iotv_server_embedded.h"
 
+#include <stdio.h>
+
 int8_t dataSizeonDataType(uint8_t type)
 {
     switch (type)
@@ -84,6 +86,18 @@ uint64_t dataPart(char **data, uint64_t partNumber, uint64_t partSize, const str
 
     char *dataChannel = iot->readChannel[channelNumber].data;
     uint64_t dataSize = iot->readChannel[channelNumber].dataSize;
+
+//    if (channelNumber == 15)
+//    {
+//    	printf("dataPart, dataSize = %d\n", (int)dataSize);
+//    	if (dataChannel != NULL)
+//    	{
+//			for (int i = 0; i < dataSize; ++i)
+//				printf("%c", dataChannel[i]);
+//			printf("\n");
+//    	}
+//    }
+
     char *endData = dataChannel + dataSize;
 
     *data = dataChannel + partSize * partNumber;
