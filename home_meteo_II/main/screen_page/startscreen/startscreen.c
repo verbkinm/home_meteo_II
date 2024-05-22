@@ -7,6 +7,14 @@
 
 #include "startscreen.h"
 
+#include <lvgl.h>
+#include "esp_app_desc.h"
+#include "Global_def.h"
+#include "Local_Lib/local_lib.h"
+#include "Local_Lib/local_lvgl_lib.h"
+#include "status_panel/status_panel.h"
+#include "screen_page/screendefault.h"
+
 extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_64;
 

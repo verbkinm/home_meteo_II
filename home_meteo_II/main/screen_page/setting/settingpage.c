@@ -7,6 +7,29 @@
 
 #include "settingpage.h"
 
+#include "esp_system.h"
+#include "esp_netif.h"
+#include "esp_eth.h"
+
+#include <stdint.h>
+#include "lvgl.h"
+
+#include "Global_def.h"
+#include "elements.h"
+#include "esp_wifi.h"
+#include "I2C/DS3231.h"
+#include "screen_page/setting/wifi/wifi.h"
+#include "screen_page/setting/date_time/date_time.h"
+#include "screen_page/setting/weather/weather.h"
+#include "screen_page/setting/display/display.h"
+#include "screen_page/setting/update/update.h"
+#include "screen_page/setting/sensors/sensors.h"
+#include "screen_page/setting/remote_sensors/remote_sensors.h"
+#include "screen_page/setting/sd/sd.h"
+#include "screen_page/screendefault.h"
+#include "TFT_touchscreen/TFT_touch_screen.h"
+#include "screen_page/page.h"
+#include "status_panel/status_panel.h"
 
 extern lv_font_t ubuntu_mono_14;
 
@@ -154,10 +177,11 @@ static void create_sd_page(lv_obj_t *parent)
 
 void settingPageInit(void)
 {
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = setting_page_deinit;
-	page->title = page_title(SETTING_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_SETTING);
+	page->num = PAGE_SETTING;
 	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
@@ -217,5 +241,5 @@ void setting_page_deinit(void)
 	((lv_menu_page_t *)sub_remote_sensors_page)->title = NULL;
 	((lv_menu_page_t *)sub_sd_page)->title = NULL;
 
-	default_page_deinit();
+	page_default_deinit();
 }

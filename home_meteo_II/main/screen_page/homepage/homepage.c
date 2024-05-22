@@ -7,8 +7,13 @@
 
 #include "homepage.h"
 
+#include "Global_def.h"
+#include "service/bme280/bme280.h"
+#include "screen_page/screendefault.h"
+#include "service/weather/weather.h"
+#include "status_panel/status_panel.h"
+
 #define BLOCK1_COUNTER_SEC	5
-#define BLOCK2_COUNTER_SEC	60
 
 static uint8_t counter_thp;
 
@@ -199,17 +204,17 @@ static void draw_wind_direction(void)
 
 static void event_handler_block_0(lv_event_t * e)
 {
-	datetime1_page_init();
+	page_set_new_num(PAGE_DATETIME1);
 }
 
 static void event_handler_block_1(lv_event_t * e)
 {
-	home_meteo_page_init();
+	page_set_new_num(PAGE_LOCAL_SENSOR);
 }
 
 static void event_handler_block_2(lv_event_t * e)
 {
-	meteo_chart_page_init();
+	page_set_new_num(PAGE_METEO_CHART);
 }
 
 static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, lv_coord_t h)
@@ -254,14 +259,7 @@ static void timer_handler(lv_timer_t *timer)
 		lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
 	}
 
-//	static uint8_t meteo_thp = BLOCK2_COUNTER_SEC;
-//	if (++meteo_thp > BLOCK2_COUNTER_SEC) // раз в 1 минуту
-//	{
-//		meteo_thp = 0;
-		draw_meteo_data();
-//		if (!draw_meteo_data())
-//			meteo_thp = BLOCK2_COUNTER_SEC;
-//	}
+	draw_meteo_data();
 }
 
 // Блок время/дата
@@ -354,10 +352,11 @@ static void init_block_2(lv_obj_t *parent)
 
 void homePageInit()
 {
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = home_page_deinit;
-	page->title = page_title(MAIN_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_MAIN);
+	page->num = PAGE_MAIN;
 	status_panel_update();
 
 	init_block_0(page->widget);
@@ -370,6 +369,6 @@ void homePageInit()
 
 void home_page_deinit(void)
 {
-	default_page_deinit();
+	page_default_deinit();
 	lv_timer_del(timer);
 }

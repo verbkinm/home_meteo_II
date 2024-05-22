@@ -1,7 +1,9 @@
 #include "TFT_touchscreen/TFT_touch_screen.h"
 #include "I2C/i2c.h"
+#include "I2C/DS3231.h"
 #include "sd/sd_spi.h"
 #include "iotv.h"
+#include "service/service.h"
 
 #include "GUI_manager/GUI_manager.h"
 

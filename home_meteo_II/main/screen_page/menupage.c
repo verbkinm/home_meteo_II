@@ -8,12 +8,18 @@
 
 #include "menupage.h"
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
-//extern lv_font_t ubuntu_mono_26;
+#include "lvgl.h"
+#include "screendefault.h"
+#include "Global_def.h"
+#include "Local_Lib/local_lvgl_lib.h"
+#include "screen_page/page.h"
+#include "status_panel/status_panel.h"
+#include "screen_page/setting/elements.h"
+
 extern lv_font_t ubuntu_mono_14;
-
-extern void homePageInit(void);
-extern void settingPageInit(void);
 
 static void btn_main_handler(lv_event_t *e);
 static void btn_datetime1_handler(lv_event_t *e);
@@ -25,45 +31,46 @@ static void btn_home_meteo_handler(lv_event_t *e);
 
 static void btn_main_handler(lv_event_t *e)
 {
-	homePageInit();
+	page_set_new_num(PAGE_MAIN);
 }
 
 static void btn_datetime1_handler(lv_event_t *e)
 {
-	datetime1_page_init();
+	page_set_new_num(PAGE_DATETIME1);
 }
 
 static void btn_datetime2_handler(lv_event_t *e)
 {
-	datetime2_page_init();
+	page_set_new_num(PAGE_DATETIME2);
 }
 
 static void btn_datetime3_handler(lv_event_t *e)
 {
-	datetime3_page_init();
+	page_set_new_num(PAGE_DATETIME3);
 }
 
 static void btn_setting_handler(lv_event_t *e)
 {
-	settingPageInit();
+	page_set_new_num(PAGE_SETTING);
 }
 
 static void btn_meteochart_handler(lv_event_t *e)
 {
-	meteo_chart_page_init();
+	page_set_new_num(PAGE_METEO_CHART);
 }
 
 static void btn_home_meteo_handler(lv_event_t *e)
 {
-	home_meteo_page_init();
+	page_set_new_num(PAGE_LOCAL_SENSOR);
 }
 
 void menuPageInit(void)
 {
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = menu_page_deinit;
-	page->title = page_title(MENU_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_MENU);
+	page->num = PAGE_MENU;
 	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
@@ -113,5 +120,5 @@ void menuPageInit(void)
 
 void menu_page_deinit(void)
 {
-	default_page_deinit();
+	page_default_deinit();
 }

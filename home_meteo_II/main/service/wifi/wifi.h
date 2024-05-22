@@ -24,5 +24,7 @@
 #include "Local_Lib/local_lvgl_lib.h"
 
 void service_wifi_task(void *pvParameters);
+void service_wifi_read_conf(void);
+esp_netif_t *service_wifi_sta_netif(void);
 
 #endif /* MAIN_SERVICE_WIFI_WIFI_H_ */

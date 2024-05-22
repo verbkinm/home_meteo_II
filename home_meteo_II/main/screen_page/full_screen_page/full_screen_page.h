@@ -15,4 +15,9 @@
 void full_screen_page_init(const char *txt, void *img);
 void full_screen_page_deinit(void);
 
+void full_screen_page_sd_error(void);
+void full_screen_page_update_now(void);
+void full_screen_page_update_done(void);
+void full_screen_page_update_fail(void);
+
 #endif /* MAIN_SCREEN_PAGE_FULL_SCREEN_PAGE_FULL_SCREEN_PAGE_H_ */

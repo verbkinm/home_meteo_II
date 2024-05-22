@@ -25,4 +25,6 @@ void sd_spi_space_info(uint32_t *totalKB, uint32_t *availableKB);
 
 sdmmc_card_t *sd_spi_card(void);
 
+esp_err_t sd_spi_info(char *buf, size_t buf_size);
+
 #endif /* MAIN_SD_SD_SPI_H_ */

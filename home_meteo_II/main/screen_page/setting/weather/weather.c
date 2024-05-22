@@ -19,6 +19,7 @@ struct Weather_page_obj {
 	lv_obj_t *busy_ind;
 	lv_timer_t *timer;
 };
+
 typedef struct Weather_page_obj weather_page_obj_t;
 
 static char *TAG = "setting_weather";
@@ -208,27 +209,47 @@ static bool parse_open_meteo_city(const char *data, open_meteo_city_t **open_met
 		goto bad_end;
 
 	*open_meteo_city = calloc(sizeof(open_meteo_city_t), *ret_counter);
+	if (open_meteo_city == NULL)
+	{
+		ESP_LOGE(TAG, "calloc error %s, %d", __func__, __LINE__);
+		goto bad_end;
+	}
 
 	int i = 0;
 	cJSON_ArrayForEach(it, results)
 	{
 		cJSON *obj;
+		uint8_t len = 0;
+
 		obj = cJSON_GetObjectItemCaseSensitive(it, "country");
-		uint8_t len = strlen(cJSON_GetStringValue(obj));
-		(*open_meteo_city)[i].country = calloc(1, len + 1);
-		memcpy((*open_meteo_city)[i].country, obj->valuestring, len);
+		if (obj != NULL)
+		{
+			len = strlen(cJSON_GetStringValue(obj));
+			(*open_meteo_city)[i].country = calloc(1, len + 1);
+			if ((*open_meteo_city)[i].country != NULL)
+				memcpy((*open_meteo_city)[i].country, obj->valuestring, len);
+		}
+		else
+			(*open_meteo_city)[i].country = calloc(1, 1);
 
 		obj = cJSON_GetObjectItemCaseSensitive(it, "name");
-		len = strlen(cJSON_GetStringValue(obj));
-		(*open_meteo_city)[i].city_name = calloc(1, len + 1);
-		memcpy((*open_meteo_city)[i].city_name, obj->valuestring, len);
+		if (obj != NULL)
+		{
+			len = strlen(cJSON_GetStringValue(obj));
+			(*open_meteo_city)[i].city_name = calloc(1, len + 1);
+			if ((*open_meteo_city)[i].city_name != NULL)
+				memcpy((*open_meteo_city)[i].city_name, obj->valuestring, len);
+		}
+		else
+			(*open_meteo_city)[i].city_name = calloc(1, 1);
 
 		obj = cJSON_GetObjectItemCaseSensitive(it, "admin1");
 		if (obj != NULL)
 		{
 			len = strlen(cJSON_GetStringValue(obj));
 			(*open_meteo_city)[i].admin1 = calloc(1, len + 1);
-			memcpy((*open_meteo_city)[i].admin1, obj->valuestring, len);
+			if ((*open_meteo_city)[i].admin1 != NULL)
+				memcpy((*open_meteo_city)[i].admin1, obj->valuestring, len);
 		}
 		else
 			(*open_meteo_city)[i].admin1 = calloc(1, 1);
@@ -238,6 +259,7 @@ static bool parse_open_meteo_city(const char *data, open_meteo_city_t **open_met
 
 		obj = cJSON_GetObjectItemCaseSensitive(it, "longitude");
 		(*open_meteo_city)[i].longitude = cJSON_GetNumberValue(obj);
+
 		++i;
 	}
 
@@ -354,15 +376,20 @@ static void switcher_handler(lv_event_t *e)
 	if (lv_obj_has_state(weather_page_obj->switcher, LV_STATE_CHECKED))
 	{
 		if (!set_meteo_config_value("on", "1"))
-			printf("on not write\n");
+			ESP_LOGE(TAG, "error %s, %d", __func__, __LINE__);
 
 		glob_set_bits_status_reg(STATUS_METEO_ON);
+		lv_obj_clear_state(weather_page_obj->btn_search, LV_STATE_DISABLED);
+		lv_obj_clear_state(weather_page_obj->textarea, LV_STATE_DISABLED);
 	}
 	else
 	{
 		glob_clear_bits_status_reg(STATUS_METEO_ON);
 		if (!set_meteo_config_value("on", "0"))
-			printf("on not write\n");
+			ESP_LOGE(TAG, "error %s, %d", __func__, __LINE__);
+
+		lv_obj_add_state(weather_page_obj->btn_search, LV_STATE_DISABLED);
+		lv_obj_add_state(weather_page_obj->textarea, LV_STATE_DISABLED);
 	}
 }
 

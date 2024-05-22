@@ -7,12 +7,13 @@
 
 #include "wifi.h"
 
+#include "service/wifi/wifi.h"
+
 #define AP_INFO_ARR_SIZE 10
 
 extern lv_obj_t *sub_wifi_page;
 
 extern lv_font_t ubuntu_mono_14;
-extern esp_netif_t *sta_netif;
 
 static const char *TAG = "wifi";
 
@@ -470,7 +471,7 @@ static void wifi_scan_done(void)
 
 static void info_handler(lv_event_t * e)
 {
-	lv_obj_t *mbox = create_msgbox(NULL, "IP INFO", "0");
+	lv_obj_t *mbox = create_msgbox(NULL, "Сетевые настройки:", "0");
 	lv_obj_t *msg_lbl = lv_msgbox_get_text(mbox);
 	lv_obj_center(mbox);
 
@@ -480,6 +481,8 @@ static void info_handler(lv_event_t * e)
 	char gw[16] = {0};
 
 	esp_netif_ip_info_t ip_info;
+
+	esp_netif_t *sta_netif = service_wifi_sta_netif();
 	esp_netif_get_ip_info(sta_netif, &ip_info);
 
 	esp_netif_dns_info_t dns;
@@ -495,14 +498,12 @@ static void info_handler(lv_event_t * e)
 	uint8_t mac[6];
 	esp_read_mac(mac, ESP_MAC_WIFI_STA);
 
-	char mac_str[18] = {0};
-	sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x",
-			mac[0], mac[1], mac[2],
-			mac[3], mac[4], mac[5]);
+	char mac_str[19] = {0};
+	snprintf(mac_str, sizeof(mac_str) - 1, MACSTR, MAC2STR(mac));
 
 	lv_label_set_text_fmt(msg_lbl,
 			"mac: %s\n"
-			"addr: %s\n"
+			"ip: %s\n"
 			"netmask: %s\n"
 			"dns: %s\n"
 			"gateway: %s",

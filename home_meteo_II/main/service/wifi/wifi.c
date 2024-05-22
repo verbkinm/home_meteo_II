@@ -12,28 +12,16 @@ static const char *TAG = "WIFI";
 esp_netif_t *sta_netif;
 
 static void wifi_init(void);
-static void read_wifi_conf(void);
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data);
 static void check_wifi_conf_file(void);
 
 static void wifi_init(void)
 {
-	//	// Initialize NVS
-	//	esp_err_t ret = nvs_flash_init();
-	//	ESP_ERROR_CHECK(nvs_flash_erase());
-	//	ret = nvs_flash_init();
-	//	if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-	//		ESP_ERROR_CHECK(nvs_flash_erase());
-	//		ret = nvs_flash_init();
-	//	}
-	//	ESP_ERROR_CHECK(ret);
 	ESP_ERROR_CHECK(esp_netif_init());
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 	sta_netif = esp_netif_create_default_wifi_sta();
 
-
-	//
 	esp_netif_create_default_wifi_ap();
 
 
@@ -74,7 +62,7 @@ static void wifi_init(void)
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
 
 	check_wifi_conf_file();
-	read_wifi_conf();
+	service_wifi_read_conf();
 }
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -209,7 +197,7 @@ static void check_wifi_conf_file(void)
 	cJSON_Delete(root);
 }
 
-static void read_wifi_conf(void)
+void service_wifi_read_conf(void)
 {
 	char *on = NULL;
 	char *auto_on = NULL;
@@ -263,6 +251,7 @@ void service_wifi_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 	wifi_init();
+	vTaskDelay(500 / portTICK_PERIOD_MS);
 
 	for( ;; )
 	{
@@ -282,6 +271,7 @@ void service_wifi_task(void *pvParameters)
 			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
 
 			glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
+			printf("Try connect to ssid = %s, pwd = %s\n", wifi_config.sta.ssid, wifi_config.sta.password);
 			esp_wifi_connect();
 		}
 
@@ -289,4 +279,9 @@ void service_wifi_task(void *pvParameters)
 		vTaskDelay(1000 / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
+}
+
+esp_netif_t *service_wifi_sta_netif(void)
+{
+	return sta_netif;
 }

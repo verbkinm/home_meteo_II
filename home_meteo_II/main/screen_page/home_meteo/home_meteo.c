@@ -7,6 +7,15 @@
 
 #include "home_meteo.h"
 
+#include "lvgl.h"
+#include "Global_def.h"
+#include "Local_Lib/local_lvgl_lib.h"
+#include "screen_page/screendefault.h"
+#include "screen_page/page.h"
+#include "status_panel/status_panel.h"
+#include "Local_Lib/widget/bar.h"
+#include "service/bme280/bme280.h"
+
 extern lv_font_t ubuntu_mono_48;
 
 static lv_obj_t *bar_t, *bar_h, *bar_p;
@@ -25,10 +34,11 @@ static void timer_handler(lv_timer_t *timer)
 
 void home_meteo_page_init(void)
 {
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = home_meteo_page_deinit;
-	page->title = page_title(HOME_METEO_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_LOCAL_SENSOR);
+	page->num = PAGE_LOCAL_SENSOR;
 	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
@@ -76,6 +86,6 @@ void home_meteo_page_init(void)
 
 void home_meteo_page_deinit(void)
 {
-	default_page_deinit();
+	page_default_deinit();
 	lv_timer_del(timer);
 }

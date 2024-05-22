@@ -65,13 +65,13 @@ static esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
 esp_err_t ota_firmware(const char *url)
 {
-	ESP_LOGW(TAG, "url - %s", url);
-
 	if (url == NULL)
 	{
 		ESP_LOGE(TAG, "url fail");
 		return ESP_FAIL;
 	}
+
+	ESP_LOGI(TAG, "url - %s", url);
 
 	esp_http_client_config_t config = {
 			.url = url,

@@ -11,18 +11,19 @@
 
 static const char *TAG = "UPDATE";
 
-static const char *url_update_info = "https://ota.verbkinm.ru/other/esp32/meteo_home_II/update_info.json";
+static const char *default_url_update_info = "https://ota.verbkinm.ru/other/esp32/meteo_home_II/update_info.json";
 static const char *default_version = "0.0";
 static const char *error_version = "Ошибка сервера обновлений!";
 
 static char *url_update = NULL;
+static char *url_update_info = NULL;
 
 static char available_version[64];
 
 static void check_update_conf_file(void);
 static esp_err_t chek_update(void);
 static void update(void);
-static bool parse_http_response(const char* content);
+static esp_err_t parse_http_response(const char* content);
 
 static void check_update_conf_file(void)
 {
@@ -40,16 +41,16 @@ static void check_update_conf_file(void)
 	if (update_notification == NULL)
 		goto end;
 
-	cJSON_AddItemToObject(update, NOTIFICATION_STR, update_notification);
+	cJSON_AddItemToObject(update, ON_STR, update_notification);
 
-	cJSON *url_obj = cJSON_CreateString(url_update_info);
+	cJSON *url_obj = cJSON_CreateString(default_url_update_info);
 	if (url_obj == NULL)
 		goto end;
 
 	cJSON_AddItemToObjectCS(update, URL_STR, url_obj);
 
 	get_update_config_value(URL_STR, &url_obj->valuestring);
-	get_update_config_value(NOTIFICATION_STR, &update_notification->valuestring);
+	get_update_config_value(ON_STR, &update_notification->valuestring);
 
 	FILE *file = fopen(UPDATE_PATH, "w");
 	if (file == NULL)
@@ -67,28 +68,33 @@ static void check_update_conf_file(void)
 void service_update_read_conf(void)
 {
 	char *buf = NULL;
-	if (get_update_config_value(NOTIFICATION_STR, &buf))
+	if (get_update_config_value(ON_STR, &buf) && buf != NULL)
 	{
 		if (strcmp(buf, "1") == 0)
 			glob_set_bits_update_reg(UPDATE_ON);
+		else
+			glob_clear_bits_update_reg(UPDATE_ON);
+
 		free(buf);
 	}
 
-	if (get_meteo_config_value(URL_STR, &buf))
+	if (get_update_config_value(URL_STR, &buf) && buf != NULL)
 	{
-		if (buf != NULL)
-		{
-//			service_weather_set_city(url);
-			free(buf);
-		}
+		if (url_update_info != NULL)
+			free(url_update_info);
+
+		url_update_info = calloc(1, strlen(buf) + 1);
+		strcpy(url_update_info, buf);
+
+		free(buf);
 	}
 }
 
-static bool parse_http_response(const char* content)
+static esp_err_t parse_http_response(const char* content)
 {
 	cJSON *root = cJSON_Parse(content);
 	if (root == NULL)
-		return false;
+		return ESP_FAIL;
 
 	cJSON *firmware = cJSON_GetObjectItemCaseSensitive(root, FIRMWARE_STR);
 	if (firmware == NULL)
@@ -128,20 +134,24 @@ static bool parse_http_response(const char* content)
 	strcpy(available_version, new_version_from_server);
 
 	cJSON_Delete(root);
-	return true;
+	return ESP_OK;
 
 	bad_end:
 	strcpy(available_version, error_version);
 	glob_clear_bits_update_reg(UPDATE_AVAILABLE);
 
 	cJSON_Delete(root);
-	return false;
+	return ESP_FAIL;
 }
 
 static esp_err_t chek_update(void)
 {
+	if (url_update_info == NULL)
+		return ESP_FAIL;
+
+	ESP_LOGI(TAG, "check update from %s", url_update_info);
+
 	glob_set_bits_update_reg(UPDATE_CHECK);
-//	ESP_LOGI(TAG, "check update");
 	esp_http_client_config_t config = {
 			.url = url_update_info,
 			.crt_bundle_attach = esp_crt_bundle_attach,
@@ -150,17 +160,25 @@ static esp_err_t chek_update(void)
 
 	esp_http_client_handle_t client = esp_http_client_init(&config);
 	if (esp_http_client_open(client, 0 != ESP_OK))
-			return ESP_FAIL;
+	{
+		ESP_LOGI(TAG, "esp_http_client_open error, url = %s", url_update_info);
+		glob_clear_bits_update_reg(UPDATE_CHECK);
+		esp_http_client_cleanup(client);
+		return ESP_FAIL;
+	}
 
 	esp_http_client_fetch_headers(client);
 
 	char *response_buffer = calloc(1, BUFSIZE);
 	esp_http_client_read(client, response_buffer, BUFSIZE);
 
-	parse_http_response(response_buffer);
+	if (parse_http_response(response_buffer) == ESP_FAIL)
+	{
+		ESP_LOGE(TAG, "Error parse url_update_info file %s", url_update_info);
+		glob_set_bits_update_reg(UPDATE_CHECK_ERROR);
+	}
 
 	esp_http_client_cleanup(client);
-
 	glob_clear_bits_update_reg(UPDATE_CHECK);
 
 	return ESP_OK;
@@ -173,7 +191,7 @@ static void update(void)
 	if (ret == ESP_OK)
 		glob_set_bits_update_reg(UPDATE_DONE);
 	else
-		glob_set_bits_status_err(STATUS_UPDATE_ERROR);
+		glob_set_bits_status_err(STATUS_ERROR_UPDATE);
 
 	glob_clear_bits_update_reg(UPDATE_NOW);
 }
@@ -196,7 +214,7 @@ void service_update_task(void *pvParameters)
 
 	for( ;; )
 	{
-//		printf("Update from core %d!\n", xPortGetCoreID() );
+		//		printf("Update from core %d!\n", xPortGetCoreID() );
 
 		if (glob_get_status_err())
 			break;

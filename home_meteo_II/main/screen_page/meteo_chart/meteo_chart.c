@@ -177,10 +177,11 @@ void meteo_chart_page_init(void)
 {
 	check_meteo_chart_file();
 
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = meteo_chart_page_deinit;
-	page->title = page_title(METEO_CHART_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_METEO_CHART);
+	page->num = PAGE_METEO_CHART;
 	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
@@ -272,5 +273,5 @@ void meteo_chart_page_init(void)
 
 void meteo_chart_page_deinit(void)
 {
-	default_page_deinit();
+	page_default_deinit();
 }

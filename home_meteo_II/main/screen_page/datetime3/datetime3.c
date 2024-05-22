@@ -5,7 +5,14 @@
  *      Author: user
  */
 
-#include "../datetime3/datetime3.h"
+#include "datetime3.h"
+
+#include <time.h>
+#include "lvgl.h"
+#include "Local_Lib/local_lvgl_lib.h"
+#include "screen_page/screendefault.h"
+#include "screen_page/page.h"
+#include "status_panel/status_panel.h"
 
 #define BOX_SIZE    64
 
@@ -80,7 +87,7 @@ void set_color(lv_obj_t *obj, uint8_t value)
 
 static void event_handler(lv_event_t *e)
 {
-	datetime1_page_init();
+	page_set_new_num(PAGE_DATETIME1);
 }
 
 static void timer_handler(lv_timer_t *timer)
@@ -105,10 +112,11 @@ static void timer_handler(lv_timer_t *timer)
 
 void datetime3_page_init(void)
 {
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = datetime3_page_deinit;
-	page->title = page_title(DATETIME3_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_DATETIME3);
+	page->num = PAGE_DATETIME3;
 	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
@@ -137,6 +145,6 @@ void datetime3_page_init(void)
 
 void datetime3_page_deinit(void)
 {
-	default_page_deinit();
+	page_default_deinit();
 	lv_timer_del(timer);
 }

@@ -8,13 +8,6 @@
 #ifndef MAIN_STATUS_PANEL_STATUS_PANEL_H_
 #define MAIN_STATUS_PANEL_STATUS_PANEL_H_
 
-#include "lvgl.h"
-
-#include "screen_page/menupage.h"
-#include "Local_Lib/local_lvgl_lib.h"
-#include "screen_page/setting/elements.h"
-//#include "sd/sd_spi.h"
-
 void status_panel_init(void);
 void status_panel_update(void);
 

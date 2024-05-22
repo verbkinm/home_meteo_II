@@ -7,6 +7,8 @@
 
 #include "update.h"
 
+#include "screen_page/page.h"
+
 extern lv_obj_t *sub_update_page;
 
 static const char *TAG = "SETTING UPDATE";
@@ -55,13 +57,14 @@ static void update_handler(lv_event_t *e)
 	lv_obj_t *dialog_box = create_dialog_box(NULL, ATTENTION_STR,
 			"Вы подтверждаете обновление программного обеспечения устройства? (при обновлении экран может мерцать)",
 			btns_yes_no_matrix(), apply_update_handler);
+
 	lv_obj_add_event_cb(dialog_box, apply_update_handler, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
 static void apply_update_handler(lv_event_t * e)
 {
 	glob_set_bits_update_reg(UPDATE_NOW);
-	full_screen_page_init("Обновление...", UPDATE_IMG);
+	full_screen_page_update_now();
 }
 
 static void factory_reset_handler(lv_event_t * e)
@@ -74,7 +77,21 @@ static void factory_reset_handler(lv_event_t * e)
 static void apply_factory_reset_handler(lv_event_t * e)
 {
 	if (backtofactory() == ESP_OK)
+	{
+		remove(WIFI_CONF_PATH);
+		remove(SNTP_CONF_PATH);
+		remove(DISPLAY_PATH);
+		remove(METEO_CONF_PATH);
+		remove(METEO_CHART_PATH);
+		remove(METEO_CITY_PATH);
+		remove(METEO_WEEK_PATH);
+		remove(UPDATE_PATH);
+		remove(SENSORS_PATH);
+		remove(IOTV_PATH);
+		remove(TMP_FILE_TXT);
+
 		esp_restart();
+	}
 
 	create_msgbox(NULL, ERROR_STR, "Ошибка сброса на заводские настройки. На устройстве отсутствует заводской раздел.");
 }
@@ -94,6 +111,11 @@ static void timer_loop(lv_timer_t *timer)
 	else
 		lv_obj_add_state(btn_update, LV_STATE_DISABLED);
 
+	if (glob_get_update_reg() & UPDATE_CHECK_ERROR)
+	{
+		create_msgbox(NULL, ERROR_STR, "Не удалось проверить наличие обновлений");
+		glob_clear_bits_update_reg(UPDATE_CHECK_ERROR);
+	}
 }
 
 static void switcher_handler(lv_event_t *e)
@@ -102,28 +124,30 @@ static void switcher_handler(lv_event_t *e)
 
 	if (lv_obj_has_state(switcher_update_notification, LV_STATE_CHECKED))
 	{
-		ret = set_update_config_value("notification", "1");
+		ret = set_update_config_value(ON_STR, "1");
 		glob_set_bits_update_reg(UPDATE_ON);
 	}
 	else
 	{
 		glob_clear_bits_update_reg(UPDATE_ON);
-		ret = set_update_config_value("notification", "0");
+		ret = set_update_config_value(ON_STR, "0");
 	}
 
 	if (!ret)
-		ESP_LOGE(TAG, "on not write\n");
+		ESP_LOGE(TAG, "set_update_config_value(ON_STR, error, %s", __func__);
 }
 
 void create_update_sub_page(lv_event_t *e)
 {
+	glob_clear_bits_update_reg(UPDATE_CHECK_ERROR);
+
 	clear_all_sub_page_child();
 
 	lv_obj_set_style_pad_hor(sub_update_page, 20, 0);
 	lv_obj_t *section = lv_menu_section_create(sub_update_page);
 
 	// Вкл./Выкл. оповещение о новых обновлениях
-	create_switch(section, LV_SYMBOL_SETTINGS, "Оповещать о новых обновлениях", (glob_get_update_reg() & UPDATE_ON), &switcher_update_notification);
+	create_switch(section, LV_SYMBOL_SETTINGS, "Проверять доступные обновления", (glob_get_update_reg() & UPDATE_ON), &switcher_update_notification);
 	lv_obj_add_event_cb(switcher_update_notification, switcher_handler, LV_EVENT_CLICKED, 0);
 
 	const esp_app_desc_t *esp_app = esp_app_get_description();

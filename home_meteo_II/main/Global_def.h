@@ -182,9 +182,9 @@
 #define WIND_270			"A:/sdcard/img/w270.png"
 #define WIND_315			"A:/sdcard/img/w315.png"
 
-#define UPDATE_IMG			"A:/sdcard/img/update.png"
-#define UPDATE_OK			"A:/sdcard/img/update_ok.png"
-#define UPDATE_FAIL			"A:/sdcard/img/update_fail.png"
+#define IMG_UPDATE			"A:/sdcard/img/update.png"
+#define IMG_UPDATE_OK		"A:/sdcard/img/update_ok.png"
+#define IMG_UPDATE_FAIL		"A:/sdcard/img/update_fail.png"
 
 // Пути конфигурационных файлов
 #define WIFI_CONF_PATH		 "/sdcard/wifi.json"
@@ -220,20 +220,21 @@ enum STATUS_REG {
 
 // Глобалные флаги ошибок
 enum STATUS_ERROR {
-	STATUS_SD_ERROR = 0x0001,
-	STATUS_UPDATE_ERROR = 0x0002,
+	STATUS_ERROR_SD = 0x0001,
+	STATUS_ERROR_UPDATE = 0x0002,
 };
 
 // Глобалные флаги обновления
 
 enum UPDATE_FLAGS {
-	UPDATE_NOW = 0x01,
+	UPDATE_ON = 0x01,				// Уведомлять на экране о новых обновлениях
 	UPDATE_CHECK = 0x02,			// Проверить сейчас наличие обновлений
-	UPDATE_AVAILABLE = 0x04,
+	UPDATE_AVAILABLE = 0x04,		// Доступно новое обновление
 	UPDATE_DONE = 0x08,
 	UPDATE_MESSAGE = 0x10,
 	UPDATE_MESSAGE_NOW = 0x20,
-	UPDATE_ON = 0x40,				// Уведомлять на экране о новых обновлениях
+	UPDATE_NOW = 0x40,
+	UPDATE_CHECK_ERROR = 0x80,		// Ошибка файла с информацией об обновлениях
 };
 
 // Повторяющиеся строки текста в коде
@@ -255,7 +256,6 @@ enum UPDATE_FLAGS {
 #define IOTV_STR			 	 "iotv"
 #define PORT_STR			 	 "port"
 
-#define NOTIFICATION_STR		 "notification"
 #define UPDATE_STR				 "update"
 #define URL_STR					 "url"
 #define FIRMWARE_STR			 "firmware"

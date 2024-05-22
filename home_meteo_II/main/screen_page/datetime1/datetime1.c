@@ -7,6 +7,13 @@
 
 #include "datetime1.h"
 
+#include <time.h>
+#include "lvgl.h"
+#include "Local_Lib/local_lvgl_lib.h"
+#include "screen_page/screendefault.h"
+#include "screen_page/page.h"
+#include "status_panel/status_panel.h"
+
 extern lv_font_t ubuntu_mono_48;
 extern lv_font_t ubuntu_mono_148;
 
@@ -31,7 +38,7 @@ static void draw_date(const struct tm *timeinfo)
 
 static void event_handler(lv_event_t * e)
 {
-	datetime2_page_init();
+	page_set_new_num(PAGE_DATETIME2);
 }
 
 static void timer_handler(lv_timer_t *timer)
@@ -53,10 +60,11 @@ static void timer_handler(lv_timer_t *timer)
 
 void datetime1_page_init(void)
 {
-	page_t *page = current_page();
+	page_t *page = page_current();
 	page->deinit();
 	page->deinit = datetime1_page_deinit;
-	page->title = page_title(DATETIME1_PAGE_TITLE);
+	page->title = page_title(PAGE_TITLE_DATETIME1);
+	page->num = PAGE_DATETIME1;
 	status_panel_update();
 
 	lv_obj_t *widget = lv_obj_create(page->widget);
@@ -76,6 +84,6 @@ void datetime1_page_init(void)
 
 void datetime1_page_deinit(void)
 {
-	default_page_deinit();
+	page_default_deinit();
 	lv_timer_del(timer);
 }

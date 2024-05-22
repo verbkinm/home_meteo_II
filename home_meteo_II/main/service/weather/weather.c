@@ -148,11 +148,7 @@ static void http_city_search(void)
 
 	esp_http_client_handle_t client = esp_http_client_init(&config);
 	if (esp_http_client_open(client, 0) != ESP_OK)
-	{
-		free(response_buffer);
-		free(url);
-		return;
-	}
+		goto end;
 
 	esp_http_client_fetch_headers(client);
 
@@ -178,8 +174,8 @@ static void http_city_search(void)
 
 	end:
 	free(url);
-	esp_http_client_cleanup(client);
 	free(response_buffer);
+	esp_http_client_cleanup(client);
 
 	glob_set_bits_status_reg(STATUS_METEO_CITY_SEARCH_DONE);
 }
@@ -535,7 +531,7 @@ static void http_meteo_to_file(void)
 	esp_http_client_handle_t client = esp_http_client_init(&config);
 
 	if (esp_http_client_open(client, 0) != ESP_OK)
-		goto http_open_error;
+		goto end;
 
 	esp_http_client_fetch_headers(client);
 
@@ -543,7 +539,7 @@ static void http_meteo_to_file(void)
 	if (file == NULL)
 	{
 		printf(CANT_WRITE_FILE_TMPLT, TAG, METEO_WEEK_PATH);
-		goto file_error;
+		goto end;
 	}
 
 	int counter = 0;
@@ -562,9 +558,8 @@ static void http_meteo_to_file(void)
 
 	fclose(file);
 
-	file_error:
+	end:
 	esp_http_client_cleanup(client);
-	http_open_error:
 	free(url);
 	free(response_buffer);
 }
@@ -663,9 +658,6 @@ void service_weather_task(void *pvParameters)
 
 		if (glob_get_status_reg() & STATUS_METEO_CITY_SEARCH)
 			http_city_search();
-
-		//		if (!(glob_get_status_reg() & STATUS_METEO_ON)) // && (glob_get_status_reg() & STATUS_TIME_SYNC)))
-		//			goto for_end;
 
 		if (glob_get_status_reg() & STATUS_METEO_UPDATE_NOW)
 		{

@@ -20,7 +20,7 @@
 
 #include "iotv.h"
 
-const static char *default_iotv_host = "192.168.40.216";
+const static char *default_iotv_host = "iotv.verbkinm.ru";
 const static uint16_t default_iotv_tcp_port = 2023;
 
 static char *iotv_host = NULL;
@@ -32,79 +32,161 @@ const static char *task_name = "tcp_client_task";
 static void tcp_client_run();
 static void tcp_client_check_conf_file(void);
 
+static int resolvHostName(const char *hostname, char ***ipList);
+static void freeIpList(char **ipList, int count);
+
+static int resolvHostName(const char *hostname, char ***ipList)
+{
+    if (hostname == NULL || ipList == NULL || *ipList != NULL)
+        return -1;
+
+    struct hostent *host_entry;
+    int count = 0;
+
+    host_entry = gethostbyname(hostname);
+    if (host_entry == NULL)
+        return -1;
+
+    char **ptr = host_entry->h_addr_list;
+
+    for (; *ptr != NULL; ++ptr, ++count);
+    if (count == 0)
+        return 0;
+
+    *ipList = malloc(sizeof(char *) * count);
+    if (*ipList == NULL)
+        return -1;
+
+    ptr = host_entry->h_addr_list;
+    for (int i = 0; *ptr != NULL; ++ptr, ++i)
+    {
+        if (*ptr == NULL)
+            break;
+
+
+        char *ip_str = inet_ntoa(*(struct in_addr *)(*ptr));
+        int ip_str_len = strlen(ip_str);
+
+        (*ipList)[i] = (char *)calloc(1, ip_str_len + 1);
+        if ((*ipList)[i] != NULL)
+            strlcpy((*ipList)[i], ip_str, ip_str_len + 1);
+    }
+
+    return count;
+}
+
+static void freeIpList(char **ipList, int count)
+{
+	if (ipList == NULL)
+		return;
+
+	if (count > 0)
+	{
+		for (int i = 0; i < count; ++i)
+		{
+			if (ipList[i] != NULL)
+				free(ipList[i]);
+		}
+
+	}
+	free(ipList);
+}
+
 static void tcp_client_run()
 {
-    char *rx_buffer = calloc(1, BUFSIZE);
-    if (rx_buffer == NULL)
-    {
-    	ESP_LOGE(TAG, "tcp_client_run rx_buffer = calloc calloc error");
-    	return;
-    }
+	char *rx_buffer = calloc(1, BUFSIZE);
+	if (rx_buffer == NULL)
+	{
+		ESP_LOGE(TAG, "tcp_client_run rx_buffer = calloc calloc error");
+		return;
+	}
 
-    int addr_family = 0;
-    int ip_protocol = 0;
-    int sock = -1;
+	int addr_family = 0;
+	int ip_protocol = 0;
+	int sock = -1;
 
-    while (1)
-    {
-        struct sockaddr_in dest_addr;
-        inet_pton(AF_INET, iotv_host, &dest_addr.sin_addr);
-        dest_addr.sin_family = AF_INET;
-        dest_addr.sin_port = htons(iotv_port);
-        addr_family = AF_INET;
-        ip_protocol = IPPROTO_IP;
+	while (1)
+	{
+		char **ipList = NULL;
+		int count = resolvHostName(iotv_host, &ipList);
+//		printf("count = %d\n", count);
+//		if (ipList != NULL)
+//		{
+//			for (int i = 0; i < count; ++i)
+//			{
+//				if (ipList[i] != NULL)
+//					printf("%d - %s\n", i, ipList[i]);
+//			}
+//		}
 
-        sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
-        if (sock < 0) {
-            ESP_LOGE(TAG, "Unable to create socket: errno %d = %s", errno, strerror(errno));
-            break;
-        }
-        ESP_LOGI(TAG, "Socket created, connecting to %s:%d", iotv_host, iotv_port);
+		if (count < 1)
+		{
+			freeIpList(ipList, count);
 
-        int err = connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
-        if (err != 0)
-        {
-            ESP_LOGE(TAG, "Socket unable to connect: errno %d = %s", errno, strerror(errno));
-            break;
-        }
-        ESP_LOGI(TAG, "Successfully connected");
+			vTaskDelay(1000 / portTICK_PERIOD_MS);
+			continue;
+		}
 
-        while (1)
-        {
-//            int err = send(sock, payload, strlen(payload), 0);
-//            if (err < 0) {
-//                ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
-//                break;
-//            }
+		struct sockaddr_in dest_addr;
+		inet_pton(AF_INET, ipList[0], &dest_addr.sin_addr);
+		dest_addr.sin_family = AF_INET;
+		dest_addr.sin_port = htons(iotv_port);
+		addr_family = AF_INET;
+		ip_protocol = IPPROTO_IP;
 
-            int len = recv(sock, rx_buffer, BUFSIZE - 1, 0);
-            // Error occurred during receiving
-            if (len < 0) {
-                ESP_LOGE(TAG, "recv failed: errno %d = %s", errno, strerror(errno));
-                break;
-            }
-            // Data received
-            else
-            {
-            	iotv_data_recived(rx_buffer, len, sock);
-            }
+		sock =  socket(addr_family, SOCK_STREAM, ip_protocol);
+		if (sock < 0) {
+			ESP_LOGE(TAG, "Unable to create socket: errno %d = %s", errno, strerror(errno));
+			break;
+		}
+		ESP_LOGI(TAG, "Socket created, connecting to %s:%d", ipList[0], iotv_port);
 
-//            taskYIELD();
-        }
+		int err = connect(sock, (struct sockaddr *)&dest_addr, sizeof(dest_addr));
+		if (err != 0)
+		{
+			ESP_LOGE(TAG, "Socket unable to connect: errno %d = %s", errno, strerror(errno));
+			break;
+		}
+		ESP_LOGI(TAG, "Successfully connected");
 
-//        if (sock != -1)
-//        {
-            ESP_LOGE(TAG, "Shutting down socket and restarting...");
-            shutdown(sock, 0);
-            close(sock);
-//        }
-    }
+		freeIpList(ipList, count);
 
-    ESP_LOGE(TAG, "Shutting down socket and restarting...");
-    shutdown(sock, 0);
-    close(sock);
+		while (1)
+		{
+			//            int err = send(sock, payload, strlen(payload), 0);
+			//            if (err < 0) {
+			//                ESP_LOGE(TAG, "Error occurred during sending: errno %d", errno);
+			//                break;
+			//            }
 
-    free(rx_buffer);
+			int len = recv(sock, rx_buffer, BUFSIZE - 1, 0);
+			// Error occurred during receiving
+			if (len < 0) {
+				ESP_LOGE(TAG, "recv failed: errno %d = %s", errno, strerror(errno));
+				break;
+			}
+			// Data received
+			else
+			{
+				iotv_data_recived(rx_buffer, len, sock);
+			}
+
+			//            taskYIELD();
+		}
+
+		//        if (sock != -1)
+		//        {
+		ESP_LOGE(TAG, "Shutting down socket and restarting...");
+		shutdown(sock, 0);
+		close(sock);
+		//        }
+	}
+
+	ESP_LOGE(TAG, "Shutting down socket and restarting...");
+	shutdown(sock, 0);
+	close(sock);
+
+	free(rx_buffer);
 }
 
 static void tcp_client_check_conf_file(void)

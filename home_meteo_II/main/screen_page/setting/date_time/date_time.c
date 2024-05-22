@@ -70,15 +70,17 @@ static void utc_dd_event_handler(lv_event_t * e)
 static void sntp_save_event_handler(lv_event_t * e)
 {
 	if (lv_obj_has_state(dt_page_obj->switcher, LV_STATE_CHECKED))
-		set_sntp_config_value("on", "1");
+		set_sntp_config_value(ON_STR, "1");
 	else
-		set_sntp_config_value("on", "0");
+		set_sntp_config_value(ON_STR, "0");
 
 	char buf[8] = {0};
 	lv_dropdown_get_selected_str(dt_page_obj->list, buf, sizeof(buf) - 1);
-	set_sntp_config_value("utc", buf);
 
-	set_sntp_config_value("url", lv_textarea_get_text(dt_page_obj->sntp_server_url));
+	set_sntp_config_value(UTC_STR, buf);
+	set_sntp_config_value(URL_STR, lv_textarea_get_text(dt_page_obj->sntp_server_url));
+
+	service_sntp_read_conf();
 }
 
 void create_sntp_page(void)
@@ -123,8 +125,8 @@ void create_sntp_page(void)
 	lv_obj_add_event_cb(dt_page_obj->list, utc_dd_event_handler, LV_EVENT_ALL, NULL);
 
 	int val = 0;
-	char *sntp_utc = service_sntp_utc();
-	if (strlen(sntp_utc) > 3)
+	const char *sntp_utc = service_sntp_utc();
+	if (sntp_utc != NULL && strlen(sntp_utc) > 3)
 		sscanf(&sntp_utc[4], "%d", &val);
 	lv_dropdown_set_selected(dt_page_obj->list, val);
 

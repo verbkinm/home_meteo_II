@@ -127,7 +127,7 @@ static bool set_config_value(const char* file_path, const char *group, const cha
 
 static bool get_config_value(const char* file_path, const char *group, const char *key, char **value)
 {
-	if (key == NULL)
+	if (file_path == NULL || group == NULL || key == NULL)
 		return false;
 
 	FILE *file = fopen(file_path, "r");

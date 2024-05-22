@@ -32,7 +32,7 @@ static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdin
 
 		if ((cur_t - old_t) == 0)
 		{
-			glob_set_bits_status_err(STATUS_SD_ERROR);
+			glob_set_bits_status_err(STATUS_ERROR_SD);
 			ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
 			return ret;
 		}
@@ -42,10 +42,96 @@ static esp_err_t wrap_sdspi_host_do_transaction(int slot, sdmmc_command_t *cmdin
 	if (ret != ESP_OK && ret != ESP_ERR_NOT_SUPPORTED)
 	{
 		ESP_LOGE(TAG, "STATUS_SD_ERROR - %d", ret);
-		glob_set_bits_status_err(STATUS_SD_ERROR);
+		glob_set_bits_status_err(STATUS_ERROR_SD);
 	}
 
 	return ret;
+}
+
+
+int sd_spi_info(char *buf, size_t buf_size)
+{
+	if (buf == NULL)
+		return ESP_FAIL;
+
+	sdmmc_card_t *card = sd_spi_card();
+
+	FILE *stream = fopen(TMP_FILE_TXT, "w+");
+	if (stream == NULL)
+	{
+		printf(CANT_WRITE_FILE_TMPLT, TAG, TMP_FILE_TXT);
+		return ESP_FAIL;
+	}
+
+	// Переделанный исходник из функции sdmmc_card_print_info файла библиотеки "sdmmc_common.с"
+	bool print_scr = false;
+	bool print_csd = false;
+	const char* type;
+
+	fprintf(stream, "Имя: %s\n", card->cid.name);
+
+	if (card->is_sdio)
+	{
+		type = "SDIO";
+		print_scr = true;
+		print_csd = true;
+	}
+	else if (card->is_mmc)
+	{
+		type = "MMC";
+		print_csd = true;
+	}
+	else
+	{
+#define SD_OCR_SDHC_CAP (1<<30)
+		type = (card->ocr & SD_OCR_SDHC_CAP) ? "SDHC/SDXC" : "SDSC";
+		print_csd = true;
+	}
+
+	fprintf(stream, "Тип: %s\n", type);
+
+	if (card->real_freq_khz == 0)
+		fprintf(stream, "Скорость: N/A\n");
+	else
+	{
+		const char *freq_unit = card->real_freq_khz < 1000 ? "kHz" : "MHz";
+		const float freq = card->real_freq_khz < 1000 ? card->real_freq_khz : card->real_freq_khz / 1000.0;
+		const char *max_freq_unit = card->max_freq_khz < 1000 ? "kHz" : "MHz";
+		const float max_freq = card->max_freq_khz < 1000 ? card->max_freq_khz : card->max_freq_khz / 1000.0;
+		fprintf(stream, "Скорость: %.2f %s (limit: %.2f %s)%s\n", freq, freq_unit, max_freq, max_freq_unit, card->is_ddr ? ", DDR" : "");
+	}
+
+	uint32_t totalKB = 0, availableKB = 0;
+	sd_spi_space_info(&totalKB, &availableKB);
+
+	fprintf(stream, "Размер: %lu МБ, доступно: %lu МБ\n", totalKB / 1024, availableKB / 1024);
+
+	if (print_csd)
+	{
+		fprintf(stream, "CSD: ver=%d, sector_size=%d, capacity=%d read_bl_len=%d\n",
+				(card->is_mmc ? card->csd.csd_ver : card->csd.csd_ver + 1),
+				card->csd.sector_size, card->csd.capacity, card->csd.read_block_len);
+		if (card->is_mmc)
+			fprintf(stream, "EXT CSD: bus_width=%d\n", (1 << card->log_bus_width));
+		else if (!card->is_sdio) // make sure card is SD
+			fprintf(stream, "SSR: bus_width=%d\n", (card->ssr.cur_bus_width ? 4 : 1));
+	}
+	if (print_scr)
+		fprintf(stream, "SCR: sd_spec=%d, bus_width=%d\n", card->scr.sd_spec, card->scr.bus_width);
+
+	size_t file_size = MIN(buf_size, ftell(stream));
+
+	fseek(stream, 0, SEEK_SET);
+
+	for (int i = 0; i < file_size - 1; ++i)
+		buf[i] = fgetc(stream);
+
+	fclose(stream);
+
+	if (remove(TMP_FILE_TXT) != 0)
+		printf(CANT_REMOVE_FILE_TMPLT, TAG, TMP_FILE_TXT);
+
+	return ESP_OK;
 }
 
 esp_err_t sd_spi_init(void)
@@ -76,7 +162,7 @@ esp_err_t sd_spi_init(void)
 	ret = spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
 	if (ret != ESP_OK)
 	{
-		glob_set_bits_status_err(STATUS_SD_ERROR);
+		glob_set_bits_status_err(STATUS_ERROR_SD);
 		ESP_LOGE(TAG, "Failed to initialize bus.");
 		return ret;
 	}
@@ -90,7 +176,7 @@ esp_err_t sd_spi_init(void)
 
 	if (ret != ESP_OK)
 	{
-		glob_set_bits_status_err(STATUS_SD_ERROR);
+		glob_set_bits_status_err(STATUS_ERROR_SD);
 		if (ret == ESP_FAIL)
 		{
 			ESP_LOGE(TAG, "Failed to mount filesystem. "

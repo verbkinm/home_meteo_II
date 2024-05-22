@@ -8,11 +8,19 @@
 #include "service/weather/weather.h"
 #include "service/tcp_client/tcp_client.h"
 #include "service/bme280/bme280.h"
+#include "service/wifi/wifi.h"
 #include "service/display/display.h"
+#include "sd/sd_spi.h"
 #include "TFT_touchscreen/TFT_touch_screen.h"
+
+#include "screen_page/menupage.h"
+#include "screen_page/homepage/homepage.h"
+#include "screen_page/setting/settingpage.h"
 
 #include "lwip/sockets.h"
 #include <esp_wifi.h>
+#include <esp_netif.h>
+#include <esp_mac.h>
 
 static uint64_t realBufSize = 0;
 
@@ -97,23 +105,23 @@ static uint8_t readType[] = {
 
 static uint8_t writeType[] = {
 		// Локальный датчик ТВД
-		DATA_TYPE_NONE,		// 0 температура
-		DATA_TYPE_NONE,		// 1 влажность
-		DATA_TYPE_NONE,		// 2 давление
+		DATA_TYPE_NONE,			// 0 температура
+		DATA_TYPE_NONE,			// 1 влажность
+		DATA_TYPE_NONE,			// 2 давление
 
 		// Внешний датчик ТВД 0
-		DATA_TYPE_NONE,		// 3 температура
-		DATA_TYPE_NONE,		// 4 влажность
-		DATA_TYPE_NONE,		// 5 давление
-		DATA_TYPE_NONE,		// 6 % батарейки питания
-		DATA_TYPE_NONE,		// 7 Время получения последних данных c датчика
+		DATA_TYPE_NONE,			// 3 температура
+		DATA_TYPE_NONE,			// 4 влажность
+		DATA_TYPE_NONE,			// 5 давление
+		DATA_TYPE_NONE,			// 6 % батарейки питания
+		DATA_TYPE_NONE,			// 7 Время получения последних данных c датчика
 
 		// Внешний датчик ТВД 1
-		DATA_TYPE_NONE,		// 8 температура
-		DATA_TYPE_NONE,		// 9 влажность
-		DATA_TYPE_NONE,		// 10 давление
-		DATA_TYPE_NONE,		// 11 % батарейки питания
-		DATA_TYPE_NONE,		// 12 Время получения последних данных c датчика
+		DATA_TYPE_NONE,			// 8 температура
+		DATA_TYPE_NONE,			// 9 влажность
+		DATA_TYPE_NONE,			// 10 давление
+		DATA_TYPE_NONE,			// 11 % батарейки питания
+		DATA_TYPE_NONE,			// 12 Время получения последних данных c датчика
 
 		// Время / Дата
 		DATA_TYPE_INT_64,		// 13 Дата/время в time_t
@@ -148,7 +156,7 @@ static uint8_t writeType[] = {
 
 		// Метео
 		DATA_TYPE_BOOL,			// 34 Выкл/Вкл.
-		DATA_TYPE_STRING,		// 35 Наименование города
+		DATA_TYPE_NONE,			// 35 Наименование города
 		DATA_TYPE_NONE,			// 36 широта
 		DATA_TYPE_NONE,			// 37 долгота
 
@@ -207,23 +215,23 @@ static void iotv_read_prepare_str(const char *str, uint8_t ch)
 	if (str == NULL)
 		return;
 
-	size_t newDataSize = strlen(str);
-//	uint8_t *chData = (uint8_t *)iot.readChannel[ch].data;
-	iot.readChannel[ch].dataSize = newDataSize;
+	uint32_t newDataSize = strlen(str);
+	iot.readChannel[ch].dataSize = 0;
 
-//	ESP_LOGE(TAG, "iotv_read_prepare_str, ch = %d, str = %s", ch, str);
+	//	if (ch == 40)
+	//	{
+	//		printf("%lu\n%lu\n", newDataSize, iot.readChannel[ch].dataSize);
+	//	}
+
 	if (iot.readChannel[ch].data != NULL)
 		free(iot.readChannel[ch].data);
 
 	iot.readChannel[ch].data = malloc(newDataSize);
-	memcpy(iot.readChannel[ch].data, str, newDataSize);
-
-//	if (ch == 15)
-//	{
-//		for (int i = 0; i < newDataSize; ++i)
-//			printf("%c", chData[i]);
-//		printf("\n");
-//	}
+	if (iot.readChannel[ch].data != NULL)
+	{
+		memcpy(iot.readChannel[ch].data, str, newDataSize);
+		iot.readChannel[ch].dataSize = newDataSize;
+	}
 }
 
 static void iotv_prepare_read_data(uint8_t ch)
@@ -272,7 +280,10 @@ static void iotv_prepare_read_data(uint8_t ch)
 	case CH_DATE_TIME:
 	{
 		time_t now;
+		struct tm timeinfo;
 		time(&now);
+		localtime_r(&now, &timeinfo);
+		now = mktime(&timeinfo);
 		memcpy(data, &now, iot.readChannel[ch].dataSize);
 	}
 	break;
@@ -298,7 +309,40 @@ static void iotv_prepare_read_data(uint8_t ch)
 	break;
 	case CH_WIFI_STA_META:
 	{
-		//!!!
+		char ip[16] = {0};
+		char netmask[16] = {0};
+		char dns_server[16] = {0};
+		char gw[16] = {0};
+
+		esp_netif_t *sta_netif = service_wifi_sta_netif();
+		esp_netif_ip_info_t ip_info;
+		esp_netif_get_ip_info(sta_netif, &ip_info);
+
+		esp_netif_dns_info_t dns;
+		esp_netif_get_dns_info(sta_netif, ESP_NETIF_DNS_MAIN, &dns);
+		esp_ip_addr_t ipaddr;
+		memcpy(&ipaddr.u_addr.ip4,  &dns.ip, 4);
+
+		esp_ip4addr_ntoa(&ip_info.ip, ip, 15);
+		esp_ip4addr_ntoa(&ip_info.netmask, netmask, 15);
+		esp_ip4addr_ntoa(&ipaddr.u_addr.ip4, dns_server, 15);
+		esp_ip4addr_ntoa(&ip_info.gw, gw, 15);
+
+		uint8_t mac[6];
+		esp_read_mac(mac, ESP_MAC_WIFI_STA);
+
+		char mac_str[19] = {0};
+		snprintf(mac_str, sizeof(mac_str) - 1, MACSTR, MAC2STR(mac));
+
+		char str[115] = {0};
+		snprintf(str, sizeof(str),
+				"mac: %s\n"
+				"ip: %s\n"
+				"netmask: %s\n"
+				"dns: %s\n"
+				"gateway: %s",
+				mac_str, ip, netmask, dns_server, gw);
+		iotv_read_prepare_str(str, ch);
 	}
 	break;
 
@@ -367,7 +411,7 @@ static void iotv_prepare_read_data(uint8_t ch)
 	// UPDATE
 	case CH_UPDATE_ENABLE:
 	{
-		if (glob_get_status_reg() & UPDATE_ON)
+		if (glob_get_update_reg() & UPDATE_ON)
 			*(bool *)data = true;
 		else
 			*(bool *)data = false;
@@ -410,12 +454,22 @@ static void iotv_prepare_read_data(uint8_t ch)
 	break;
 	case CH_METEO_LATITUDE:
 	{
-		//!!!
+		char *latitude = NULL;
+		if (get_meteo_config_value(LATITUDE_STR, &latitude) && latitude != NULL)
+		{
+			*(float *)data = strtof(latitude, NULL);
+			free(latitude);
+		}
 	}
 	break;
 	case CH_METEO_LONGITUDE:
 	{
-		//!!!
+		char *longitude = NULL;
+		if (get_meteo_config_value(LONGITUDE_STR, &longitude) && longitude != NULL)
+		{
+			*(float *)data = strtof(longitude, NULL);
+			free(longitude);
+		}
 	}
 	break;
 
@@ -434,14 +488,20 @@ static void iotv_prepare_read_data(uint8_t ch)
 	// SD
 	case CH_SD_META:
 	{
-		//!!!
+		char *buf = calloc(1, BUFSIZE);
+		if (buf != NULL)
+		{
+			if (sd_spi_info(buf, BUFSIZE - 1) == ESP_OK)
+				iotv_read_prepare_str(buf, ch);
+			free(buf);
+		}
 	}
 	break;
 
 	// Дополнительные параметры / действия
 	case CH_EXT_CUR_PAGE:
 	{
-		//!!!
+		*(int8_t *)data = page_current()->num;
 	}
 	break;
 	default:
@@ -459,7 +519,9 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 	// дата/время
 	case CH_DATE_TIME:
 	{
-		//		DS3231_set_iotv_time();
+		time_t time = *(int64_t *)data;
+		struct timeval tv = {.tv_sec = time};
+		settimeofday(&tv, NULL);
 	}
 	break;
 
@@ -482,6 +544,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 			memcpy(hostname, data, dataSize);
 			set_wifi_config_value(SSID_STR, hostname);
 			free(hostname);
+			service_wifi_read_conf();
 		}
 	}
 	break;
@@ -494,6 +557,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 			memcpy(pwd, data, dataSize);
 			set_wifi_config_value(PWD_STR, pwd);
 			free(pwd);
+			service_wifi_read_conf();
 		}
 	}
 	break;
@@ -533,6 +597,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 		char str[5] = {0};
 		snprintf(str, 4, "%d", *(uint8_t *)data);
 		set_display_config_value(BRIGHTNESS_STR, str);
+		service_display_read_conf();
 	}
 	break;
 	case CH_DSIPLAY_NIGHT_MODE:
@@ -554,6 +619,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 		char str[5] = {0};
 		snprintf(str, 4, "%d", *(uint8_t *)data);
 		set_display_config_value(BRIGHTNESS_DAY_STR, str);
+		service_display_read_conf();
 	}
 	break;
 	case CH_DSIPLAY_NIGHT_BRIGHTNESS:
@@ -561,6 +627,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 		char str[5] = {0};
 		snprintf(str, 4, "%d", *(uint8_t *)data);
 		set_display_config_value(BRIGHTNESS_NIGHT_STR, str);
+		service_display_read_conf();
 	}
 	break;
 	case CH_DSIPLAY_DAY_START:
@@ -570,6 +637,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 			char str[9] = {0}; // 9 dd:dd:dd\0
 			memcpy(str, data, sizeof(str) - 1);
 			set_display_config_value(DAY_BEGIN_STR, str);
+			service_display_read_conf();
 		}
 	}
 	break;
@@ -580,6 +648,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 			char str[9] = {0}; // 9 dd:dd:dd\0
 			memcpy(str, data, sizeof(str) - 1);
 			set_display_config_value(NIGHT_BEGIN_STR, str);
+			service_display_read_conf();
 		}
 	}
 	break;
@@ -672,18 +741,6 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 		}
 	}
 	break;
-	case CH_METEO_CITY:
-	{
-		char *city = calloc(1, dataSize + 1);
-		if (city != NULL)
-		{
-			memcpy(city, data, dataSize);
-			set_meteo_config_value(CITY_STR, city);
-			free(city);
-			service_weather_read_conf();
-		}
-	}
-	break;
 
 	// IOTV сервер
 	case CH_IOTV_SERVER_HOSTNAME:
@@ -706,7 +763,7 @@ static void iotv_write_data(uint8_t ch, uint8_t *data, size_t dataSize)
 	// Дополнительные параметры / действия
 	case CH_EXT_CUR_PAGE:
 	{
-		//!!!
+		page_set_new_num(*(int8_t *)data);
 	}
 	break;
 	case CH_EXT_REBOOT:
