@@ -1,0 +1,10 @@
+idf_component_register(SRCS "main.c"
+						"Local_Lib/local_lib.c"
+						"service/service.c"
+						"service/wifi/wifi.c"
+						"service/udp_client/udp_client.c"
+						"deep_sleep/deep_sleep.c"
+						"dht22/dht22.c"
+						"I2C/i2c.c"
+						"I2C/BME280.c"
+                    INCLUDE_DIRS ".")

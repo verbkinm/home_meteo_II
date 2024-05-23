@@ -48,7 +48,8 @@ void service_udp_server_task(void *pvParameters)
 
 	while (true)
 	{
-		if (glob_get_status_err())
+		if (glob_get_status_err()
+				|| (glob_get_update_reg() & UPDATE_NOW))
 			break;
 
 		if (!(glob_get_status_reg() & STATUS_WIFI_AP_START))

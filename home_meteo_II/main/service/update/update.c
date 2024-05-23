@@ -214,9 +214,8 @@ void service_update_task(void *pvParameters)
 
 	for( ;; )
 	{
-		//		printf("Update from core %d!\n", xPortGetCoreID() );
-
-		if (glob_get_status_err())
+		if (glob_get_status_err()
+				|| (glob_get_update_reg() & UPDATE_NOW))
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )

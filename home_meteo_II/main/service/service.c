@@ -12,7 +12,6 @@
 #include "display/display.h"
 #include "bme280/bme280.h"
 #include "update/update.h"
-#include "ble/ble_client.h"
 #include "udp_server/udp_server.h"
 #include "tcp_client/tcp_client.h"
 #include "iotv.h"

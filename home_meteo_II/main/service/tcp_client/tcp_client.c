@@ -257,8 +257,10 @@ void service_tcp_client_task(void *pvParameters)
 
 	for( ;; )
 	{
-		if (glob_get_status_err())
+		if (glob_get_status_err()
+				|| (glob_get_update_reg() & UPDATE_NOW))
 			break;
+
 
 		if ((glob_get_status_reg() & STATUS_IP_GOT) && (iotv_get()->state == 1))
 			tcp_client_run();
