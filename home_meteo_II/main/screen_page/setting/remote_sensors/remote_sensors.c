@@ -11,39 +11,33 @@
 //extern lv_font_t ubuntu_mono_14;
 extern lv_obj_t *sub_remote_sensors_page;
 
-static char *txt = "Удалённый датчик температуры и влажности:";
-
-static lv_obj_t *lbl_cur_status;
-static lv_obj_t *lbl_cur_temp;
-static lv_obj_t *lbl_cur_hum;
-static lv_obj_t *lbl_cur_battery;
+static lv_obj_t *sensors_data_text[SENSOR_COUNT];
 
 static lv_timer_t *timer = NULL;
 
 static void timer_loop(lv_timer_t *timer);
-static void update(lv_event_t *e);
 
 static void timer_loop(lv_timer_t *timer)
 {
-//	if (ble_client_is_connect())
-//	{
-//		lv_label_set_text(lbl_cur_status, "Подключён");
-//		lv_obj_set_style_text_color(lbl_cur_status, lv_palette_main(LV_PALETTE_GREEN), 0);
-//	}
-//	else
-//	{
-//		lv_label_set_text(lbl_cur_status, "Не подключён");
-//		lv_obj_set_style_text_color(lbl_cur_status, lv_palette_main(LV_PALETTE_RED), 0);
-//	}
+	for (int i = 0; i < SENSOR_COUNT; ++i)
+	{
+		const remote_sensor_t *sensor = service_upd_server_get_sensor(i);
 
-	lv_label_set_text_fmt(lbl_cur_temp, "%.2f °C", udp_server_temperature());
-	lv_label_set_text_fmt(lbl_cur_hum, "%.2f %%", udp_server_humidity());
-	lv_label_set_text_fmt(lbl_cur_battery, "%.2f %%", udp_server_battery());
-}
-
-static void update(lv_event_t *e)
-{
-	lv_timer_ready(timer);
+		lv_label_set_text_fmt(sensors_data_text[i],
+				"%.02d:%.02d:%.02d  %02d.%.02d.%.04d\n"
+				"%.2f %%\n"
+				"%.2f °C\n"
+				"%.2f %%\n"
+				"%.2f мм рт.ст.\n"
+				"%d",
+				sensor->last_connect.tm_hour, sensor->last_connect.tm_min, sensor->last_connect.tm_sec,
+				sensor->last_connect.tm_mday, sensor->last_connect.tm_mon + 1, sensor->last_connect.tm_year + 1900,
+				sensor->battery,
+				sensor->temperature,
+				sensor->humidity,
+				sensor->pressure,
+				sensor->error);
+	}
 }
 
 void create_remote_sensors_sub_page(lv_event_t *e)
@@ -53,27 +47,27 @@ void create_remote_sensors_sub_page(lv_event_t *e)
 
 	lv_obj_t *section = lv_menu_section_create(sub_remote_sensors_page);
 
-	create_text(section, NULL, txt, LV_MENU_ITEM_BUILDER_VAR_1);
+	for (int i = 0; i < SENSOR_COUNT; ++i)
+	{
+		char buf[24] = {0};
+		snprintf(buf, sizeof(buf) - 1, "Датчик № %d:", i + 1);
 
-	lv_obj_t *cont = create_text(section, NULL, "Статус:", LV_MENU_ITEM_BUILDER_VAR_2);
-	lbl_cur_status = lv_label_create(lv_obj_get_child(cont, 0));
-	lv_obj_set_align(lbl_cur_status, LV_ALIGN_CENTER);
+		create_text(section, NULL, buf, LV_MENU_ITEM_BUILDER_VAR_1);
 
-	cont = create_text(section, NULL, "Температура:", LV_MENU_ITEM_BUILDER_VAR_1);
-	lbl_cur_temp = lv_label_create(lv_obj_get_child(cont, 0));
-	lv_obj_set_align(lbl_cur_temp, LV_ALIGN_CENTER);
+		lv_obj_t *obj = lv_menu_cont_create(section);
+		lv_obj_t *leftText = lv_label_create(obj);
+		lv_obj_set_align(leftText, LV_ALIGN_LEFT_MID);
+		lv_label_set_text_fmt(leftText,
+				"Последнее подключение:\n"
+				"Заряд аккумулятора:\n"
+				"Температура:\n"
+				"Влажность:\n"
+				"Давление:\n"
+				"Код ошибки:");
 
-	cont = create_text(section, NULL, "Влажность:", LV_MENU_ITEM_BUILDER_VAR_2);
-	lbl_cur_hum = lv_label_create(lv_obj_get_child(cont, 0));
-	lv_obj_set_align(lbl_cur_hum, LV_ALIGN_CENTER);
-
-	cont = create_text(section, NULL, "Батарея:", LV_MENU_ITEM_BUILDER_VAR_2);
-	lbl_cur_battery = lv_label_create(lv_obj_get_child(cont, 0));
-	lv_obj_set_align(lbl_cur_battery, LV_ALIGN_CENTER);
-
-	lv_obj_t *btn_update = NULL;
-	create_button(section, UPDATE_RU_STR, 128, 40, &btn_update);
-	lv_obj_add_event_cb(btn_update, update, LV_EVENT_CLICKED, 0);
+		sensors_data_text[i] = lv_label_create(obj);
+		lv_obj_set_align(sensors_data_text[i], LV_ALIGN_RIGHT_MID);
+	}
 
 	timer = lv_timer_create(timer_loop, 5000, 0);
 	lv_timer_ready(timer);

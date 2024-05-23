@@ -804,9 +804,7 @@ static uint64_t iotv_write_func(char *data, uint64_t size, void *obj)
 
 	//	printf("data -> ");
 	//	for (int i = 0; i < size; ++i)
-	//	{
 	//		printf("%02X:", data[i]);
-	//	}
 	//	printf("\n");
 
 	return send(socket, data, size, 0);

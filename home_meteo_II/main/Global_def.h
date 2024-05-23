@@ -5,6 +5,18 @@
 
 #define DELAYED_LAUNCH						0//10000
 
+// SENSOR
+#define SENSOR_COUNT						2
+#define SENSOR_DATA_SIZE					4
+
+#define SENSOR_ARRAY_SIZE					18
+#define SENSOR_NUMBER						0
+#define SENSOR_ERROR						1
+#define SENSOR_TEMPERATURE					2
+#define SENSOR_HUMIDITY						6
+#define SENSORP_PRESSURE					10
+#define SENSOR_ACCUM						14
+
 // IOTV
 #define CH_SENSOR_LOCAL_T					0
 #define CH_SENSOR_LOCAL_H					1

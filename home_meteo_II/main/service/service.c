@@ -27,7 +27,7 @@ void start_services(void)
 	xTaskCreate(service_BME280_task, "BME280_service_task", 4096, 0, 10, 0);
 	xTaskCreate(service_update_task, "update_service_task", 4096, 0, 1, 0);
 
-//	xTaskCreate(udp_server_task, "udp_server_task", 4096, 0, 10, 0);
-	xTaskCreate(service_iotv_task, "service_iotv_task", 4096, 0, 15, 0);
+	xTaskCreate(service_udp_server_task, "udp_server_task", 4096, 0, 10, 0);
+	xTaskCreate(service_iotv_task, "service_iotv_task", 4096, 0, 10, 0);
 	xTaskCreate(service_tcp_client_task, "service_tcp_client_task", 8192, 0, 10, 0);
 }

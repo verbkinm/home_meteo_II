@@ -8,10 +8,23 @@
 #ifndef MAIN_SERVICE_UDP_SERVER_UDP_SERVER_H_
 #define MAIN_SERVICE_UDP_SERVER_UDP_SERVER_H_
 
-void udp_server_task(void *pvParameters);
+#include <stdint.h>
+#include <time.h>
 
-float udp_server_temperature(void);
-float udp_server_humidity(void);
-float udp_server_battery(void);
+struct Sensor {
+	struct tm last_connect;
+	float temperature,
+		humidity,
+		pressure,
+		battery;
+
+	uint8_t sensor_number;
+	int8_t error;
+};
+typedef struct Sensor remote_sensor_t;
+
+void service_udp_server_task(void *pvParameters);
+
+const remote_sensor_t *service_upd_server_get_sensor(uint8_t sensor_number);
 
 #endif /* MAIN_SERVICE_UDP_SERVER_UDP_SERVER_H_ */
