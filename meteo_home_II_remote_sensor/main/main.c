@@ -13,7 +13,7 @@ void app_main(void)
 	}
 	ESP_ERROR_CHECK(ret);
 
-	i2c_init();
+//	i2c_init();
 
 	start_services();
 }

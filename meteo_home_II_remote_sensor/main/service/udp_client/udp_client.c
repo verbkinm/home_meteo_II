@@ -65,9 +65,14 @@ static void udp_client_send_data()
 	//	//	memcpy(&arr[SENSOR_ACCUM], &getTemperature(), SENSOR_DATA_SIZE);
 
 	setDHTgpio(GPIO_NUM_4);
+	gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
+	gpio_set_level(GPIO_NUM_2, 1);
+	vTaskDelay(1000 / portTICK_PERIOD_MS);
 
 	printf("DHT Sensor Readings\n" );
 	int ret = readDHT();
+
+	gpio_set_level(GPIO_NUM_2, 0);
 
 	errorHandler(ret);
 
@@ -106,7 +111,7 @@ void service_udp_client_task(void *pvParameters)
 			udp_client_send_data();
 			//			deep_sleep();
 		}
-		vTaskDelay(1000 * 60 * 1 / portTICK_PERIOD_MS); // Раз в 1 минуту
+		vTaskDelay(1000 * 1 * 1 / portTICK_PERIOD_MS); // Раз в 1 секунды
 	}
 	vTaskDelete(NULL);
 

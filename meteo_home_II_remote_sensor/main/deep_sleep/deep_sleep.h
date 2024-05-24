@@ -8,6 +8,8 @@
 #ifndef MAIN_DEEP_SLEEP_DEEP_SLEEP_H_
 #define MAIN_DEEP_SLEEP_DEEP_SLEEP_H_
 
-void deep_sleep(void);
+#include <stdint.h>
+
+void deep_sleep(uint16_t sec);
 
 #endif /* MAIN_DEEP_SLEEP_DEEP_SLEEP_H_ */

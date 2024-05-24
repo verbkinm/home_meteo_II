@@ -13,10 +13,9 @@
 
 #include "Global_def.h"
 
-void deep_sleep(void)
+void deep_sleep(uint16_t sec)
 {
-	const int wakeup_time_sec = SLEEP_SEC;
-	printf("Enabling timer wakeup, %ds\n", wakeup_time_sec);
-	ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000));
+	printf("Enabling timer wakeup, %ds\n", sec);
+	ESP_ERROR_CHECK(esp_sleep_enable_timer_wakeup(sec * 1000000));
 	esp_deep_sleep_start();
 }

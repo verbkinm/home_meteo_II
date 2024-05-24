@@ -11,7 +11,7 @@
 #define BUFSIZE 							2048  // по умолчанию, после компиляции, BUFSIZ = 128
 
 // WIFI
-#define WIFI_ATTEMPS_CONN_COUNT				0
+#define WIFI_ATTEMPS_CONN_COUNT				3
 #define WIFI_SSID							"AP"
 #define WIFI_PASSWORD						"01234567"
 //#define WIFI_SSID							"TP-Link_A6BE"
@@ -44,7 +44,7 @@
 #define BME280_ADDR                			0x76
 
 // DEEP_SLEEP
-#define	SLEEP_SEC							1
+#define	SLEEP_SEC							10
 
 // Глобалные флаги статусов
 enum STATUS_REG {

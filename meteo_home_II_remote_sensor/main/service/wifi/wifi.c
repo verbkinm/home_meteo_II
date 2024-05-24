@@ -132,7 +132,7 @@ void service_wifi_task(void *pvParameters)
 	for( ;; )
 	{
 		if (counter_try_connect > WIFI_ATTEMPS_CONN_COUNT)
-			deep_sleep();
+			deep_sleep(SLEEP_SEC);
 
 		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_START))
 			goto for_end;
@@ -142,9 +142,6 @@ void service_wifi_task(void *pvParameters)
 
 		if ( !(glob_get_status_reg() & STATUS_WIFI_STA_CONNECTED) )
 		{
-			wifi_config_t wifi_config;
-			esp_wifi_get_config(WIFI_IF_STA, &wifi_config);
-
 			glob_set_bits_status_reg(STATUS_WIFI_STA_CONNECTING);
 			esp_wifi_connect();
 		}

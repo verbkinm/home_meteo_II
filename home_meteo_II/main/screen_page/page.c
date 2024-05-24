@@ -10,11 +10,13 @@
 #include "Local_Lib/local_lib.h"
 #include <esp_log.h>
 
+static const char *TAG = "PAGE";
+
 static page_t glob_current_page;
-static uint8_t new_page_num;
+static page_type_t new_page_num;
 static char *page_title_str[] = {" ", "Меню", "Главный экран", "Цифровые часы", "Аналоговые часы", "Бинарные часы", "Настройки", "График погоды", "Погода в доме"};
 
-char* page_title(uint8_t num)
+char *page_title(uint8_t num)
 {
 	if (num >= END_PAGE_TITLE)
 		return page_title_str[0];
@@ -27,12 +29,12 @@ page_t *page_current(void)
 	return &glob_current_page;
 }
 
-uint8_t page_get_new_num(void)
+page_type_t page_get_new_num(void)
 {
 	return new_page_num;
 }
 
-void page_set_new_num(int8_t num)
+void page_set_new_num(page_type_t num)
 {
 	new_page_num = inRange(num, PAGE_BLANK, PAGE_NUM - 1);
 }

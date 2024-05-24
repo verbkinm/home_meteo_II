@@ -123,8 +123,8 @@ static void timer_handler(lv_timer_t *timer)
 		}
 	}
 
-	int8_t page_num = page_get_new_num();
-	if (page_current()->num != PAGE_BLANK)
+	page_type_t page_num = page_get_new_num();
+	if (page_num != PAGE_BLANK)
 	{
 		switch(page_num)
 		{

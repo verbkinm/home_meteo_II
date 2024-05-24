@@ -12,6 +12,7 @@
 #include "screen_page/screendefault.h"
 #include "service/weather/weather.h"
 #include "status_panel/status_panel.h"
+#include "block/block.h"
 
 #define BLOCK1_COUNTER_SEC	5
 
@@ -24,7 +25,7 @@ extern lv_font_t ubuntu_mono_128;
 
 //static const char *TAG = "homepage";
 
-static lv_obj_t *block_0, *block_1, *block_2;
+static lv_obj_t *block__0, *block__2, *block_0, *block_1, *block_2;
 
 //Блок 0 - дата и время
 lv_obj_t *time_lbl, *date_lbl;
@@ -39,8 +40,8 @@ lv_obj_t *city_lbl, *last_update_lbl, *cloud_codver_img, *precipitations_img, *w
 
 static lv_timer_t *timer = NULL;
 
-static void drawTime(const struct tm *timeinfo);
-static void drawDate(const struct tm *timeinfo);
+//static void drawTime(const struct tm *timeinfo);
+//static void drawDate(const struct tm *timeinfo);
 static bool draw_meteo_data(void);
 static void draw_cloud_cover(void);
 static void draw_precipitations(void);
@@ -59,15 +60,15 @@ static void timer_handler(lv_timer_t *timer);
 
 static lv_obj_t *create_block(lv_obj_t *parent, lv_align_t align, lv_coord_t w, lv_coord_t h);
 
-static void drawTime(const struct tm *timeinfo)
-{
-	lv_label_set_text_fmt(time_lbl, "%.02d:%.02d", timeinfo->tm_hour, timeinfo->tm_min);
-}
-
-static void drawDate(const struct tm *timeinfo)
-{
-	lv_label_set_text_fmt(date_lbl, "%s. %02d.%.02d.%.04d", weekday_name_short(timeinfo->tm_wday), timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
-}
+//static void drawTime(const struct tm *timeinfo)
+//{
+//	lv_label_set_text_fmt(time_lbl, "%.02d:%.02d", timeinfo->tm_hour, timeinfo->tm_min);
+//}
+//
+//static void drawDate(const struct tm *timeinfo)
+//{
+//	lv_label_set_text_fmt(date_lbl, "%s. %02d.%.02d.%.04d", weekday_name_short(timeinfo->tm_wday), timeinfo->tm_mday, timeinfo->tm_mon + 1, timeinfo->tm_year + 1900);
+//}
 
 static bool draw_meteo_data(void)
 {
@@ -240,24 +241,26 @@ static void timer_handler(lv_timer_t *timer)
 		return;
 	}
 
-	time_t now;
-	struct tm timeinfo;
-	time(&now);
-	localtime_r(&now, &timeinfo);
+	block_update(block__0);
+	block_update(block__2);
+//	time_t now;
+//	struct tm timeinfo;
+//	time(&now);
+//	localtime_r(&now, &timeinfo);
+//
+//	drawTime(&timeinfo);
+//	drawDate(&timeinfo);
 
-	drawTime(&timeinfo);
-	drawDate(&timeinfo);
-
-	if (++counter_thp > BLOCK1_COUNTER_SEC) // раз в 5 секунд
-	{
-		counter_thp = 0;
-
-		const struct THP *thp = service_BME280_get_value();
-		lv_label_set_text_fmt(temperature1_lbl, "%+.2f°C", thp->temperature);
-		lv_label_set_text_fmt(humidity1_lbl, "%.2f %%", thp->humidity);
-		lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);
-		lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
-	}
+//	if (++counter_thp > BLOCK1_COUNTER_SEC) // раз в 5 секунд
+//	{
+//		counter_thp = 0;
+//
+//		const struct THP *thp = service_BME280_get_value();
+//		lv_label_set_text_fmt(temperature1_lbl, "%+.2f°C", thp->temperature);
+//		lv_label_set_text_fmt(humidity1_lbl, "%.2f %%", thp->humidity);
+//		lv_label_set_text_fmt(pressure1_lbl, "%.0f", thp->pressure);
+//		lv_obj_align_to(pressure1_lbl_prefix, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 25, 7);
+//	}
 
 	draw_meteo_data();
 }
@@ -357,10 +360,17 @@ void homePageInit()
 	page->deinit = home_page_deinit;
 	page->title = page_title(PAGE_TITLE_MAIN);
 	page->num = PAGE_MAIN;
+
 	status_panel_update();
 
-	init_block_0(page->widget);
-	init_block_1(page->widget);
+//	init_block_0(page->widget);
+	block__0 = block_create(page->widget, BLOCKTYPE_LOCALSENSOR_1_4);
+	lv_obj_align(block__0, LV_ALIGN_TOP_LEFT, 0, 0);
+
+	block__2 = block_create(page->widget, BLOCKTYPE_DATETIME_1_4);
+	lv_obj_align(block__2, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+
+//	init_block_1(page->widget);
 	init_block_2(page->widget);
 
 	timer = lv_timer_create(timer_handler, 1000, NULL);

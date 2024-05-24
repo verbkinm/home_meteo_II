@@ -23,6 +23,7 @@ enum {
 
 	END_PAGE_TITLE
 };
+typedef int page_title_t;
 
 // Переключение страниц
 enum {
@@ -43,21 +44,22 @@ enum {
 
 	PAGE_NUM
 };
+typedef int page_type_t;
 
 typedef struct Page {
 	char *title;
 	lv_obj_t *widget;
 	lv_obj_t *fullscreen;
 	void (*deinit)(void);
-	uint8_t num;
+	page_type_t num;
 } page_t;
 
-char* page_title(uint8_t num);
+char *page_title(uint8_t num);
 
 page_t *page_current(void);
 void page_default_deinit(void);
 
-uint8_t page_get_new_num(void);
-void page_set_new_num(int8_t num);
+page_type_t page_get_new_num(void);
+void page_set_new_num(page_type_t num);
 
 #endif /* MAIN_SCREEN_PAGE_PAGE_H_ */
