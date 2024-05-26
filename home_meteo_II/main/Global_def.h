@@ -3,7 +3,7 @@
 
 // Отложенный запуск сервисов
 
-#define DELAYED_LAUNCH						0//10000
+#define DELAYED_LAUNCH						10000
 
 // SENSOR
 #define SENSOR_COUNT						2

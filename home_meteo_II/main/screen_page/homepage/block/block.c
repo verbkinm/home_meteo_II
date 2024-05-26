@@ -35,8 +35,8 @@ static void update_datetime_1_4(lv_obj_t *obj)
 	lv_obj_t *time_lbl = lv_obj_get_child(obj, 0);
 	lv_obj_t *date_lbl = lv_obj_get_child(obj, 1);
 
-//	if (time_lbl == NULL || date_lbl == NULL)
-//		return;
+	//	if (time_lbl == NULL || date_lbl == NULL)
+	//		return;
 
 	time_t now;
 	struct tm timeinfo;
@@ -84,8 +84,8 @@ static lv_obj_t *create_block_1_4(lv_obj_t *parent, lv_coord_t w, lv_coord_t h)
 static lv_obj_t *create_datetime_1_4(lv_obj_t *parent)
 {
 	lv_obj_t *block = create_block_1_4(parent, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
-	block->user_data = malloc(sizeof(page_type_t));
-	*(page_type_t *)block->user_data = PAGE_DATETIME1;
+	block->user_data = malloc(sizeof(block_type_t));
+	*(block_type_t *)block->user_data = BLOCKTYPE_DATETIME_1_4;
 
 	lv_obj_t *time_lbl = create_lbl_obj(block, "00:00", block, LV_ALIGN_DEFAULT, 0, 0, lv_color_white(), &ubuntu_mono_128);
 	lv_obj_align(time_lbl, LV_ALIGN_CENTER, 0, -30);
@@ -100,19 +100,20 @@ static lv_obj_t *create_datetime_1_4(lv_obj_t *parent)
 static lv_obj_t *create_sensor_1_4(lv_obj_t *parent, block_type_t type)
 {
 	lv_obj_t *block = create_block_1_4(parent, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
-	block->user_data = malloc(sizeof(page_type_t));
+	block->user_data = malloc(sizeof(block_type_t));
+	*(block_type_t *)block->user_data = type;
 	if (type == BLOCKTYPE_LOCALSENSOR_1_4)
-		*(page_type_t *)block->user_data = PAGE_LOCAL_SENSOR;
+	{
+		lv_obj_t *temperature_img = create_img_obj(block, TEMPERATURE, block, LV_ALIGN_TOP_LEFT, 64, 64, 30, 10);
+		create_lbl_obj(block, "0.0°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
-	lv_obj_t *temperature_img = create_img_obj(block, TEMPERATURE, block, LV_ALIGN_TOP_LEFT, 64, 64, 30, 10);
-	create_lbl_obj(block, "0.0°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+		lv_obj_t *humidity_img = create_img_obj(block, HUMIDITY, temperature_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
+		create_lbl_obj(block, "0 %", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
 
-	lv_obj_t *humidity_img = create_img_obj(block, HUMIDITY, temperature_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
-	create_lbl_obj(block, "0 %", humidity_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
-
-	lv_obj_t *pressure_img = create_img_obj(block, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
-	lv_obj_t *pressure1_lbl = create_lbl_obj(block, "0", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
-	create_lbl_obj(block, HG_STR, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
+		lv_obj_t *pressure_img = create_img_obj(block, PRESSURE, humidity_img, LV_ALIGN_OUT_BOTTOM_RIGHT, 64, 64, 0, 5);
+		lv_obj_t *pressure1_lbl = create_lbl_obj(block, "0", pressure_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
+		create_lbl_obj(block, HG_STR, pressure1_lbl, LV_ALIGN_OUT_RIGHT_MID, 20, 7, lv_color_white(), &ubuntu_mono_26);
+	}
 
 	lv_obj_add_event_cb(block, event_handler_block_clicked, LV_EVENT_CLICKED, block->user_data);
 
@@ -126,8 +127,11 @@ static void event_handler_block_clicked(lv_event_t *e)
 
 	if (e->user_data != NULL)
 	{
-		page_type_t pt = *(page_type_t *)e->user_data;
-		page_set_new_num(pt);
+		block_type_t bt = *(block_type_t *)e->user_data;
+		if(bt == BLOCKTYPE_DATETIME_1_4)
+			page_set_new_num(PAGE_DATETIME1);
+		else if (bt == BLOCKTYPE_LOCALSENSOR_1_4)
+			page_set_new_num(PAGE_LOCAL_SENSOR);
 	}
 }
 

@@ -82,7 +82,7 @@ static void timer_startscreen_end_handler(lv_timer_t *timer)
 	//	start_services();
 	homePageInit();
 
-	lv_timer_t *gui_manager_timer = lv_timer_create(timer_handler, 100, 0);
+	lv_timer_t *gui_manager_timer = lv_timer_create(timer_handler, 500, 0);
 	lv_timer_ready(gui_manager_timer);
 }
 
