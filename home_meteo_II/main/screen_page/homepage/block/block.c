@@ -84,8 +84,8 @@ static lv_obj_t *create_block_1_4(lv_obj_t *parent, lv_coord_t w, lv_coord_t h)
 static lv_obj_t *create_datetime_1_4(lv_obj_t *parent)
 {
 	lv_obj_t *block = create_block_1_4(parent, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
-	block->user_data = malloc(sizeof(block_type_t));
-	*(block_type_t *)block->user_data = BLOCKTYPE_DATETIME_1_4;
+	block->user_data = malloc(sizeof(page_type_t));
+	*(page_type_t *)block->user_data = PAGE_DATETIME1;
 
 	lv_obj_t *time_lbl = create_lbl_obj(block, "00:00", block, LV_ALIGN_DEFAULT, 0, 0, lv_color_white(), &ubuntu_mono_128);
 	lv_obj_align(time_lbl, LV_ALIGN_CENTER, 0, -30);
@@ -100,8 +100,9 @@ static lv_obj_t *create_datetime_1_4(lv_obj_t *parent)
 static lv_obj_t *create_sensor_1_4(lv_obj_t *parent, block_type_t type)
 {
 	lv_obj_t *block = create_block_1_4(parent, LCD_H_RES / 2, (LCD_V_RES - LCD_PANEL_STATUS_H) / 2);
-	block->user_data = malloc(sizeof(block_type_t));
-	*(block_type_t *)block->user_data = type;
+	block->user_data = malloc(sizeof(page_type_t));
+	if (type == BLOCKTYPE_LOCALSENSOR_1_4)
+		*(page_type_t *)block->user_data = PAGE_LOCAL_SENSOR;
 
 	lv_obj_t *temperature_img = create_img_obj(block, TEMPERATURE, block, LV_ALIGN_TOP_LEFT, 64, 64, 30, 10);
 	create_lbl_obj(block, "0.0°C", temperature_img, LV_ALIGN_OUT_RIGHT_TOP, 40, 5, lv_color_white(), &ubuntu_mono_48);
