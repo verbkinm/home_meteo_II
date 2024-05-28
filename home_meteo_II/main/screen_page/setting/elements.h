@@ -29,6 +29,7 @@ struct Time_block {
 typedef struct Time_block time_block_t;
 
 char *generate_dropdown_number(uint8_t begin, uint8_t end, uint8_t *count);
+lv_obj_t *create_drop_down_list(lv_obj_t *parent, const char *opt, lv_coord_t width, lv_coord_t height, lv_align_t align, lv_coord_t x_ofs, lv_coord_t y_ofs, lv_font_t *font);
 lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char * txt, lv_menu_builder_variant_t builder_variant);
 lv_obj_t *create_spinbox(lv_obj_t *parent, char *text, int16_t data, int16_t min, int16_t max,
 		uint8_t digit_count, uint8_t separator_position,

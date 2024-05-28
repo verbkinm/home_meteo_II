@@ -88,6 +88,7 @@ static void apply_factory_reset_handler(lv_event_t * e)
 		remove(UPDATE_PATH);
 		remove(SENSORS_PATH);
 		remove(IOTV_PATH);
+		remove(MAIN_PAGE_PATH);
 		remove(TMP_FILE_TXT);
 
 		esp_restart();

@@ -18,6 +18,7 @@
 #include "elements.h"
 #include "esp_wifi.h"
 #include "I2C/DS3231.h"
+#include "screen_page/setting/main_page/main_page.h"
 #include "screen_page/setting/wifi/wifi.h"
 #include "screen_page/setting/date_time/date_time.h"
 #include "screen_page/setting/weather/weather.h"
@@ -36,6 +37,7 @@ extern lv_font_t ubuntu_mono_14;
 lv_obj_t *menu;
 static lv_obj_t *root_page;
 
+lv_obj_t *sub_main_page;
 lv_obj_t *sub_date_time_page;
 lv_obj_t *sub_sub_time_page;
 lv_obj_t *sub_sub_date_page;
@@ -50,6 +52,7 @@ lv_obj_t *sub_remote_sensors_page;
 lv_obj_t *sub_sd_page;
 
 static const char *root_page_title = "Настройки";
+static const char *main_page_title = "Главный экран";
 static const char *date_time_page_title = "Дата/Время";
 static const char *display_page_title = "Дисплей";
 static const char *sntp_page_title = "SNTP";
@@ -64,6 +67,7 @@ static const char *sd_page_title = "SD";
 
 static void create_sub_pages(void);
 
+static void create_main_page(lv_obj_t *parent);
 static void create_date_time_page(lv_obj_t *parent);
 static void create_display_page(lv_obj_t *parent);
 static void create_wifi_page(lv_obj_t *parent);
@@ -75,6 +79,7 @@ static void create_sd_page(lv_obj_t *parent);
 
 static void create_sub_pages(void)
 {
+	sub_main_page = lv_menu_page_create(menu, (char *)main_page_title);
 	sub_date_time_page = lv_menu_page_create(menu, (char *)date_time_page_title);
 	sub_sub_time_page = lv_menu_page_create(menu, (char *)time_page_title);
 	sub_sub_date_page = lv_menu_page_create(menu, (char *)date_page_title);
@@ -91,6 +96,9 @@ static void create_sub_pages(void)
 
 void clear_all_sub_page_child(void)
 {
+	lv_obj_clean(sub_main_page);
+	free_main_sub_page();
+
 	lv_obj_clean(sub_date_time_page);
 	lv_obj_clean(sub_sub_time_page);
 	lv_obj_clean(sub_sub_date_page);
@@ -117,6 +125,13 @@ void clear_all_sub_page_child(void)
 
 	lv_obj_clean(sub_sd_page);
 	free_sd_sub_page();
+}
+
+static void create_main_page(lv_obj_t *parent)
+{
+	lv_obj_t *cont = create_text(parent, LV_SYMBOL_HOME, main_page_title, LV_MENU_ITEM_BUILDER_VAR_1);
+	lv_menu_set_load_page_event(menu, cont, sub_main_page);
+	lv_obj_add_event_cb(cont, create_main_sub_page, LV_EVENT_CLICKED, cont);
 }
 
 static void create_date_time_page(lv_obj_t *parent)
@@ -210,6 +225,7 @@ void settingPageInit(void)
 	lv_obj_set_style_pad_hor(root_page, 20, 0);
 	section = lv_menu_section_create(root_page);
 
+	create_main_page(section);
 	create_date_time_page(section);
 	create_display_page(section);
 	create_wifi_page(section);
@@ -227,6 +243,8 @@ void setting_page_deinit(void)
 	clear_all_sub_page_child();
 
 	((lv_menu_page_t *)root_page)->title = NULL;
+
+	((lv_menu_page_t *)sub_main_page)->title = NULL;
 
 	((lv_menu_page_t *)sub_date_time_page)->title = NULL;
 	((lv_menu_page_t *)sub_sub_time_page)->title = NULL;

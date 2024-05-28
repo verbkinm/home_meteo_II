@@ -35,7 +35,7 @@ const remote_sensor_t *service_upd_server_get_sensor(uint8_t sensor_number)
 
 void service_udp_server_task(void *pvParameters)
 {
-	vTaskDelay(1000 / portTICK_PERIOD_MS);
+	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
 	printf("%s %s start\n", TAG, task_name);
 
 	rx_buffer = calloc(1, BUFSIZE);

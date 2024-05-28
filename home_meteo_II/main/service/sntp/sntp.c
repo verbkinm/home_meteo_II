@@ -170,7 +170,10 @@ void service_sntp_task(void *pvParameters)
 
 		if ( !(glob_get_status_reg() & STATUS_SNTP_ON)
 				|| !(glob_get_status_reg() & STATUS_IP_GOT) )
+		{
+			service_sntp_update();
 			goto for_end;
+		}
 
 		service_sntp_read_conf();
 
@@ -200,7 +203,7 @@ void service_sntp_task(void *pvParameters)
 		}
 
 		for_end:
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_SNTP / portTICK_PERIOD_MS);
 	}
 
 	vTaskDelete(NULL);

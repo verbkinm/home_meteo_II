@@ -72,6 +72,16 @@ bool get_iotv_config_value(const char *key, char **value)
 	return get_config_value(IOTV_PATH, IOTV_STR, key, value);
 }
 
+bool set_main_page_config_value(const char *key, const char *value)
+{
+	return set_config_value(MAIN_PAGE_PATH, BLOCKS_STR, key, value);
+}
+
+bool get_main_page_config_value(const char *key, char **value)
+{
+	return get_config_value(MAIN_PAGE_PATH, BLOCKS_STR, key, value);
+}
+
 static bool set_config_value(const char* file_path, const char *group, const char *key, const char *value)
 {
 	FILE *file = fopen(file_path, "r");

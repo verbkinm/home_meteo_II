@@ -20,6 +20,8 @@ static char *url_update_info = NULL;
 
 static char available_version[64];
 
+uint16_t counter = COUNTER_CHECK_UPDATE;
+
 static void check_update_conf_file(void);
 static esp_err_t chek_update(void);
 static void update(void);
@@ -201,6 +203,11 @@ const char *service_update_get_available_version(void)
 	return available_version;
 }
 
+void service_update_update(void)
+{
+	counter = COUNTER_CHECK_UPDATE;
+}
+
 void service_update_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
@@ -210,15 +217,17 @@ void service_update_task(void *pvParameters)
 
 	strcpy(available_version, default_version);
 
-	uint16_t counter = COUNTER_CHECK_UPDATE;
-
 	for( ;; )
 	{
-		if (glob_get_status_err())
+		if (glob_get_status_err()
+				|| (glob_get_update_reg() & UPDATE_NOW))
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
+		{
+			service_update_update();
 			goto for_end;
+		}
 
 		if (glob_get_update_reg() & UPDATE_NOW)
 		{
@@ -230,7 +239,7 @@ void service_update_task(void *pvParameters)
 		if (glob_get_update_reg() & UPDATE_CHECK)
 		{
 			if (chek_update() != ESP_OK)
-				counter = COUNTER_CHECK_UPDATE;
+				service_update_update();
 		}
 
 		// Фоновая проверка нового обновления. В lvgl потоке будет показано сообщение, если есть новая версия обновления
@@ -247,7 +256,7 @@ void service_update_task(void *pvParameters)
 		}
 
 		for_end:
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_UPDATE / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

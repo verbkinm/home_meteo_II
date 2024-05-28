@@ -112,7 +112,7 @@ void service_BME280_task(void *pvParameters)
 
 		BME280_readValues(&thp, &thp_without_calibration);
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_BME280 / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

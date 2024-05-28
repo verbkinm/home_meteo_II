@@ -62,7 +62,7 @@ void service_display_task(void *pvParameters)
 			}
 		}
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_DISPLAY / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

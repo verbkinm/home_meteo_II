@@ -7,6 +7,11 @@
 
 #include "sensors.h"
 
+#include "screen_page/setting/settingpage.h"
+#include "screen_page/setting/elements.h"
+#include "Local_Lib/local_lvgl_lib.h"
+#include "service/bme280/bme280.h"
+
 extern lv_font_t ubuntu_mono_14;
 extern lv_obj_t *sub_sensors_page;
 

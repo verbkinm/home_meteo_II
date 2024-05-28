@@ -3,9 +3,10 @@
 
 // Отложенный запуск сервисов
 
-#define DELAYED_LAUNCH						10000
+#define DELAYED_LAUNCH						0//10000
 
 // SENSOR
+
 #define SENSOR_COUNT						2
 #define SENSOR_DATA_SIZE					4
 
@@ -18,6 +19,7 @@
 #define SENSOR_ACCUM						14
 
 // IOTV
+
 #define CH_SENSOR_LOCAL_T					0
 #define CH_SENSOR_LOCAL_H					1
 #define CH_SENSOR_LOCAL_P					2
@@ -77,6 +79,7 @@
 #define CH_EXT_UPDATE_UPDATE				45
 
 // TCP
+
 #define PORT                        		8888
 #define KEEPALIVE_IDLE              		5
 #define KEEPALIVE_INTERVAL          		5
@@ -85,6 +88,7 @@
 #define HOSTNAME							"meteo_home"
 
 // I2C
+
 #define I2C_MASTER_SCL_IO           		GPIO_NUM_20				   /*!< GPIO number used for I2C master clock */
 #define I2C_MASTER_SDA_IO           		GPIO_NUM_19				   /*!< GPIO number used for I2C master data  */
 #define I2C_MASTER_NUM              		0                          /*!< I2C master i2c port number, the number of i2c peripheral interfaces available will depend on the chip */
@@ -94,16 +98,19 @@
 #define I2C_MASTER_TIMEOUT_MS      			1000
 
 // Адреса i2c устройств
+
 #define BME280_ADDR                			0x76
 #define DS3231_ADDR							0x68
 
 // SPI
+
 #define	SPI_NUM_CS							10
 #define	SPI_NUM_MOSI						11
 #define	SPI_NUM_MISO						13
 #define	SPI_NUM_SCK							12
 
 // TFT
+
 #define LCD_PIXEL_CLOCK_HZ     				(18 * 1000 * 1000)
 #define LCD_BK_LIGHT_ON_LEVEL 				1
 #define LCD_BK_LIGHT_OFF_LEVEL 				!LCD_BK_LIGHT_ON_LEVEL
@@ -151,6 +158,7 @@
 #define LEDC_FREQUENCY          			(120) // Frequency in Hertz.
 
 // FS PATH
+
 #define	SD_ON				"A:/sdcard/panel/sd_on.png"
 #define	SD_OFF				"A:/sdcard/panel/sd_off.png"
 #define	WIFI_CONNECTED		"A:/sdcard/panel/wifi_con.png"
@@ -199,6 +207,7 @@
 #define IMG_UPDATE_FAIL		"A:/sdcard/img/update_fail.png"
 
 // Пути конфигурационных файлов
+
 #define WIFI_CONF_PATH		 "/sdcard/wifi.json"
 #define SNTP_CONF_PATH		 "/sdcard/sntp.json"
 #define DISPLAY_PATH		 "/sdcard/disp.json"
@@ -209,9 +218,11 @@
 #define UPDATE_PATH			 "/sdcard/update.json"
 #define SENSORS_PATH		 "/sdcard/sensors.json"
 #define IOTV_PATH		 	 "/sdcard/iotv.json"
+#define MAIN_PAGE_PATH		 "/sdcard/main_page.json"
 #define TMP_FILE_TXT         "/sdcard/tmp.txt"
 
 // Глобалные флаги статусов
+
 enum STATUS_REG {
 	STATUS_WIFI_STA_START = 0x0001,
 	STATUS_WIFI_STA_CONNECTING = 0x0002,
@@ -231,6 +242,7 @@ enum STATUS_REG {
 };
 
 // Глобалные флаги ошибок
+
 enum STATUS_ERROR {
 	STATUS_ERROR_SD = 0x0001,
 	STATUS_ERROR_UPDATE = 0x0002,
@@ -267,6 +279,12 @@ enum UPDATE_FLAGS {
 
 #define IOTV_STR			 	 "iotv"
 #define PORT_STR			 	 "port"
+
+#define BLOCKS_STR				 "blocks"
+#define BLOCK_0_STR				 "block_0"
+#define BLOCK_1_STR				 "block_1"
+#define BLOCK_2_STR				 "block_2"
+#define BLOCK_3_STR				 "block_3"
 
 #define UPDATE_STR				 "update"
 #define URL_STR					 "url"
@@ -315,14 +333,26 @@ enum UPDATE_FLAGS {
 #define SETTING_STR				 "Настройки"
 
 //fmt шаблоны
+
 #define CANT_WRITE_FILE_TMPLT	"%s can't write \"%s\" file!\n"
 #define CANT_READ_FILE_TMPLT	"%s can't read \"%s\" file!\n"
 #define CANT_REMOVE_FILE_TMPLT	"%s can't remove \"%s\" file!\n"
 
 // Константы
+
 #define COUNTER_WEATHER			(60 * 15) 	// раз в 15 минут
 #define COUNTER_CHECK_UPDATE 	(60 * 60) 	// раз в 1 час
 #define COUNTER_SNTP			(60 * 1) 	// раз в 1 минуту
+
+// Периодичность циклов служб
+#define SERVICE_PERIOD_DISPLAY		1000
+#define SERVICE_PERIOD_BME280		5000
+#define SERVICE_PERIOD_SNTP			1000
+#define SERVICE_PERIOD_TCP_CLIENT	1000
+#define SERVICE_PERIOD_UPDATE		1000
+#define SERVICE_PERIOD_WEATHER		1000
+#define SERVICE_PERIOD_WIFI			5000
+#define SERVICE_PERIOD_GUI			500
 
 
 #endif /* MAIN_GLOBAL_DEF_H_ */

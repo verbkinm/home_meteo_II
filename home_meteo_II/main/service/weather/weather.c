@@ -550,7 +550,7 @@ static void http_meteo_to_file(void)
 			break;
 
 		fwrite(response_buffer, ret, 1, file);
-//		vTaskDelay(10 / portTICK_PERIOD_MS);
+		//		vTaskDelay(10 / portTICK_PERIOD_MS);
 
 		if (counter++ > 250) // 250 - ???
 			break;
@@ -653,7 +653,11 @@ void service_weather_task(void *pvParameters)
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT)
 				|| !(glob_get_status_reg() & STATUS_METEO_ON))
+		{
+			service_weather_update();
 			goto for_end;
+		}
+
 
 		if (glob_get_status_reg() & STATUS_METEO_CITY_SEARCH)
 			http_city_search();
@@ -661,7 +665,7 @@ void service_weather_task(void *pvParameters)
 		if (glob_get_status_reg() & STATUS_METEO_UPDATE_NOW)
 		{
 			glob_clear_bits_status_reg(STATUS_METEO_UPDATE_NOW);
-			counter = COUNTER_WEATHER;
+			service_weather_update();
 		}
 
 		if (++counter < COUNTER_WEATHER)
@@ -671,10 +675,10 @@ void service_weather_task(void *pvParameters)
 
 		http_meteo_to_file();
 		if (service_weather_parse_meteo_data() == false)
-			counter = COUNTER_WEATHER;
+			service_weather_update();
 
 		for_end:
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_WEATHER / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

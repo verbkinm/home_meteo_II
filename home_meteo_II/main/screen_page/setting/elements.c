@@ -36,6 +36,33 @@ char *generate_dropdown_number(uint8_t begin, uint8_t end, uint8_t *count)
 	return 0;
 }
 
+// для применения шрифта для элементов выпадающего списка
+void create_drop_down_list_event_cb(lv_event_t *e)
+{
+    switch (lv_event_get_code(e)) {
+        case LV_EVENT_READY: {
+        	lv_obj_set_style_text_font(lv_dropdown_get_list(lv_event_get_target(e)), e->user_data, 0);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+lv_obj_t *create_drop_down_list(lv_obj_t *parent, const char *opt, lv_coord_t width, lv_coord_t height, lv_align_t align, lv_coord_t x_ofs, lv_coord_t y_ofs, lv_font_t *font)
+{
+	lv_obj_t *obj = lv_dropdown_create(parent);
+	lv_obj_set_style_text_font(obj, font, 0);
+
+	lv_dropdown_set_options(obj, opt);
+	lv_obj_set_size(obj, width, height);
+	lv_obj_align(obj, align, x_ofs, y_ofs);
+
+	lv_obj_add_event_cb(obj, create_drop_down_list_event_cb, LV_EVENT_ALL, font);
+
+	return obj;
+}
+
 lv_obj_t *create_text(lv_obj_t * parent, const char * icon, const char *txt, lv_menu_builder_variant_t builder_variant)
 {
 	lv_obj_t *obj = lv_menu_cont_create(parent);
@@ -189,7 +216,7 @@ lv_obj_t *create_button(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_
 	return obj;
 }
 
-lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height,  lv_font_t *font)
+lv_obj_t *create_button_simply(lv_obj_t *parent, const char *txt, lv_coord_t width, lv_coord_t height, lv_font_t *font)
 {
 	lv_obj_t *btn = lv_btn_create(parent);
 	lv_obj_set_size(btn, width, height);

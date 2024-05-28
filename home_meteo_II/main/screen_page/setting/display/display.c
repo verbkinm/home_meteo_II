@@ -6,6 +6,11 @@
  */
 
 #include "display.h"
+
+#include "screen_page/setting/settingpage.h"
+#include "screen_page/setting/elements.h"
+#include "json/json_config.h"
+#include "service/display/display.h"
 //#include "settingpage.h"
 
 extern lv_obj_t *sub_display_page;;

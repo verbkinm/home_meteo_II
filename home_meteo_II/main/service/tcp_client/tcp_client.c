@@ -265,7 +265,7 @@ void service_tcp_client_task(void *pvParameters)
 		if ((glob_get_status_reg() & STATUS_IP_GOT) && (iotv_get()->state == 1))
 			tcp_client_run();
 
-		vTaskDelay(1000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_TCP_CLIENT / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

@@ -275,7 +275,7 @@ void service_wifi_task(void *pvParameters)
 		}
 
 		for_end:
-		vTaskDelay(5000 / portTICK_PERIOD_MS);
+		vTaskDelay(SERVICE_PERIOD_WIFI / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
 }

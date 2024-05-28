@@ -419,7 +419,12 @@ void create_weather_sub_page(lv_event_t *e)
 	lv_textarea_set_max_length(weather_page_obj->textarea, 32);
 	lv_textarea_set_placeholder_text(weather_page_obj->textarea, "Введите название населённого пункта.");
 	lv_obj_align(weather_page_obj->textarea, LV_ALIGN_LEFT_MID, 0, 0);
-	//	lv_textarea_set_text(weather_page_obj->textarea, ???);
+
+	if (!(glob_get_status_reg() & STATUS_METEO_ON))
+	{
+		lv_obj_add_state(weather_page_obj->btn_search, LV_STATE_DISABLED);
+		lv_obj_add_state(weather_page_obj->textarea, LV_STATE_DISABLED);
+	}
 
 	// клавиатура
 	weather_page_obj->keyboard = create_keyboard(lv_scr_act(), LV_ALIGN_BOTTOM_MID,
