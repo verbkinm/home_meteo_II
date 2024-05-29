@@ -177,7 +177,7 @@ static uint8_t writeType[] = {
 
 static struct IOTV_Server_embedded iot = {
 		.id = 9,
-		.name = "Meteo_Home_II",
+		.name = NULL,
 		.description = "Meteo_Home_II",
 		.numberReadChannel = 46,
 		.readChannel = NULL,
@@ -185,7 +185,7 @@ static struct IOTV_Server_embedded iot = {
 		.numberWriteChannel = 46,
 		.writeChannelType = writeType,
 		.state = 0,
-		.nameSize = 13,
+		.nameSize = 0,//13,
 		.descriptionSize = 13
 };
 
@@ -878,9 +878,32 @@ static esp_err_t iotv_init(void)
 
 	if (iot.readChannel == NULL)
 	{
-		ESP_LOGE(TAG, "iotv_init iot.readChannel - calloc error");
+		ESP_LOGE(TAG, "iotv_init iot.readChannel - malloc error");
 		return ESP_FAIL;
 	}
+
+	uint8_t mac[6] = {0};
+	esp_efuse_mac_get_default(mac);
+
+	char mac_str[18] = {0};
+	sprintf(mac_str, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+	char name[256] = {0}; // длина имени в протоколе IOTV определяется одним байтом. Максимальное значение получается 255
+	strcat(name, IOTV_DEVICE_NAME);
+	strcat(name, " (");
+	strcat(name, mac_str);
+	strcat(name, ")");
+
+	size_t nameSize = strlen(name);
+	iot.name = malloc(nameSize);
+	if (iot.name  == NULL)
+	{
+		ESP_LOGE(TAG, "iotv_init iot.name - malloc error");
+		return ESP_FAIL;
+	}
+	iot.nameSize = nameSize;
+
+	memcpy(iot.name, name, nameSize);
 
 	for (uint8_t i = 0; i < iot.numberReadChannel; ++i)
 	{
@@ -900,6 +923,8 @@ static esp_err_t iotv_init(void)
 	}
 
 	iot.state = 1;
+
+	ESP_LOGI(TAG, "init success. ESP name = %s", name);
 
 	return ESP_OK;
 }
@@ -997,8 +1022,6 @@ void iotv_data_recived(const char *data, int size, int sock)
 
 void service_iotv_task(void *pvParameters)
 {
-	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
-
 	if (iotv_init() == ESP_FAIL)
 		ESP_LOGE(TAG, "iotv init fail");
 

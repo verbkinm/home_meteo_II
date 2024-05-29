@@ -3,7 +3,7 @@
 
 // Отложенный запуск сервисов
 
-#define DELAYED_LAUNCH						0//10000
+#define DELAYED_LAUNCH						10000
 
 // SENSOR
 
@@ -19,6 +19,7 @@
 #define SENSOR_ACCUM						14
 
 // IOTV
+#define IOTV_DEVICE_NAME					"Meteo_Home_II"
 
 #define CH_SENSOR_LOCAL_T					0
 #define CH_SENSOR_LOCAL_H					1
