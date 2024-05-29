@@ -7,6 +7,7 @@
 
 #include "bme280.h"
 
+static const char *TAG = "BME280_service";
 static struct THP thp, thp_without_calibration;
 
 static void check_conf_file(void);
@@ -98,6 +99,7 @@ const struct THP *service_BME280_get_value_without_calibration(void)
 void service_BME280_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+	printf("%s task start\n", TAG);
 
 	check_conf_file();
 	read_conf();
@@ -107,13 +109,15 @@ void service_BME280_task(void *pvParameters)
 	for( ;; )
 	{
 		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+				|| (glob_get_update_reg() & UPDATE_NOW)
+				|| (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 		BME280_readValues(&thp, &thp_without_calibration);
 
 		vTaskDelay(SERVICE_PERIOD_BME280 / portTICK_PERIOD_MS);
 	}
+	printf("%s task stop\n", TAG);
 	vTaskDelete(NULL);
 }
 

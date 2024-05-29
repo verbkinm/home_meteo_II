@@ -210,7 +210,10 @@ void service_update_update(void)
 
 void service_update_task(void *pvParameters)
 {
+	ota_firmware_from_sd();
+
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+	printf("%s task start\n", TAG);
 
 	check_update_conf_file();
 	service_update_read_conf();
@@ -219,8 +222,7 @@ void service_update_task(void *pvParameters)
 
 	for( ;; )
 	{
-		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+		if (glob_get_status_err() || (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
@@ -258,5 +260,6 @@ void service_update_task(void *pvParameters)
 		for_end:
 		vTaskDelay(SERVICE_PERIOD_UPDATE / portTICK_PERIOD_MS);
 	}
+	printf("%s task stop\n", TAG);
 	vTaskDelete(NULL);
 }

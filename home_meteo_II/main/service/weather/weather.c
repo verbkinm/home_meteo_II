@@ -640,15 +640,16 @@ void service_weather_update(void)
 void service_weather_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+	printf("%s task start\n", TAG);
 
 	check_meteo_conf_file();
 	service_weather_read_conf();
 
-
 	for( ;; )
 	{
 		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+				|| (glob_get_update_reg() & UPDATE_NOW)
+				|| (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT)
@@ -680,5 +681,6 @@ void service_weather_task(void *pvParameters)
 		for_end:
 		vTaskDelay(SERVICE_PERIOD_WEATHER / portTICK_PERIOD_MS);
 	}
+	printf("%s task stop\n", TAG);
 	vTaskDelete(NULL);
 }

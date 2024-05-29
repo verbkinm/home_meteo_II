@@ -65,7 +65,7 @@ enum
 	_dig_H6	 		= 0xE7,
 };
 
-static const char *TAG = "BME280";
+static const char *TAG = "BME280_I2C";
 
 static int32_t _t_fine;
 static bool BME280_state = false;

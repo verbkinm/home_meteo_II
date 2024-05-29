@@ -42,9 +42,15 @@ void full_screen_page_sd_error(void)
 	page_current()->num = PAGE_SYS_SD_ERROR;
 }
 
-void full_screen_page_update_now(void)
+void full_screen_page_update_https_now(void)
 {
-	full_screen_page_init("Обновление...", IMG_UPDATE);
+	full_screen_page_init("Обновление (HTTPS) ...", IMG_UPDATE);
+	page_current()->num = PAGE_SYS_UPDATE_NOW;
+}
+
+void full_screen_page_update_sd_now(void)
+{
+	full_screen_page_init("Обновление (SD) ...", IMG_UPDATE);
 	page_current()->num = PAGE_SYS_UPDATE_NOW;
 }
 

@@ -207,6 +207,10 @@
 #define IMG_UPDATE_OK		"A:/sdcard/img/update_ok.png"
 #define IMG_UPDATE_FAIL		"A:/sdcard/img/update_fail.png"
 
+#define FIRMWARE_PATH		"/sdcard/app.bin"
+#define FIRMWARE_OK_PATH	"/sdcard/app_OK.bin"
+#define FIRMWARE_ERROR_PATH	"/sdcard/app_ERROR.bin"
+
 // Пути конфигурационных файлов
 
 #define WIFI_CONF_PATH		 "/sdcard/wifi.json"
@@ -242,7 +246,7 @@ enum STATUS_REG {
 	STATUS_WIFI_AP_START = 0x4000,				// была поднята wifi станция
 };
 
-// Глобалные флаги ошибок
+// Глобалные флаги ошибок (критические ошибки). При любой такой ошибке, службы завершают свою работу
 
 enum STATUS_ERROR {
 	STATUS_ERROR_SD = 0x0001,
@@ -255,11 +259,12 @@ enum UPDATE_FLAGS {
 	UPDATE_ON = 0x01,				// Уведомлять на экране о новых обновлениях
 	UPDATE_CHECK = 0x02,			// Проверить сейчас наличие обновлений
 	UPDATE_AVAILABLE = 0x04,		// Доступно новое обновление
-	UPDATE_DONE = 0x08,
+	UPDATE_DONE = 0x08,				// Обновление успешно завершено
 	UPDATE_MESSAGE = 0x10,
 	UPDATE_MESSAGE_NOW = 0x20,
-	UPDATE_NOW = 0x40,
-	UPDATE_CHECK_ERROR = 0x80,		// Ошибка файла с информацией об обновлениях
+	UPDATE_NOW = 0x40,				// Происходит обновление по https
+	UPDATE_SD_NOW = 0x80,			// Происходит обновление c sd
+	UPDATE_CHECK_ERROR = 0x0100,	// Ошибка файла с информацией об обновлениях
 };
 
 // Повторяющиеся строки текста в коде
@@ -339,7 +344,7 @@ enum UPDATE_FLAGS {
 #define CANT_READ_FILE_TMPLT	"%s can't read \"%s\" file!\n"
 #define CANT_REMOVE_FILE_TMPLT	"%s can't remove \"%s\" file!\n"
 
-// Константы
+// Значения счетчиков
 
 #define COUNTER_WEATHER			(60 * 15) 	// раз в 15 минут
 #define COUNTER_CHECK_UPDATE 	(60 * 60) 	// раз в 1 час

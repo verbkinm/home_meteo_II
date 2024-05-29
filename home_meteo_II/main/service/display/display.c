@@ -26,13 +26,16 @@ void service_display_read_conf(void)
 
 void service_display_task(void *pvParameters)
 {
+	printf("%s task start\n", TAG);
+
 	check_display_conf_file();
 	read_display_conf();
 
 	for( ;; )
 	{
 		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+				|| (glob_get_update_reg() & UPDATE_NOW)
+				|| (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 		if (glob_get_status_reg() & STATUS_DISPLAY_NIGHT_MODE_ON)
@@ -64,6 +67,7 @@ void service_display_task(void *pvParameters)
 
 		vTaskDelay(SERVICE_PERIOD_DISPLAY / portTICK_PERIOD_MS);
 	}
+	printf("%s task stop\n", TAG);
 	vTaskDelete(NULL);
 }
 

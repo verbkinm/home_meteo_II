@@ -8,7 +8,6 @@
 #include "sntp.h"
 
 const char *TAG = "SNTP";
-const static char *task_name = "sntp_task";
 
 static const char *sntp_utc_default = "UTC-3";
 static const char *sntp_server_url_default = "pool.ntp.org";
@@ -152,7 +151,7 @@ void service_sntp_update(void)
 void service_sntp_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
-	printf("%s %s start\n", TAG, task_name);
+	printf("%s task start\n", TAG);
 
 	check_sntp_conf_file();
 	service_sntp_read_conf();
@@ -162,10 +161,9 @@ void service_sntp_task(void *pvParameters)
 
 	while(true)
 	{
-		//		printf("SNTP from core %d!\n", xPortGetCoreID() );
-
 		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+				|| (glob_get_update_reg() & UPDATE_NOW)
+				|| (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_SNTP_ON)
@@ -205,7 +203,7 @@ void service_sntp_task(void *pvParameters)
 		for_end:
 		vTaskDelay(SERVICE_PERIOD_SNTP / portTICK_PERIOD_MS);
 	}
-
+	printf("%s task stop\n", TAG);
 	vTaskDelete(NULL);
 }
 

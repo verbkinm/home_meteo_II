@@ -35,7 +35,6 @@ static void update_handler(lv_event_t * e)
 
 	if (strcmp(lv_msgbox_get_active_btn_text(dialog_box), YES_STR) == 0)
 	{
-		printf("%s %s", TAG, YES_STR);
 		if ( !(glob_get_status_reg() & STATUS_IP_GOT) )
 		{
 			create_msgbox_not_connected();
@@ -52,7 +51,10 @@ static void update_handler(lv_event_t * e)
 static void timer_startscreen_end_handler(lv_timer_t *timer)
 {
 	lv_timer_del(timer);
-	lv_obj_del(lv_obj_get_child(lv_scr_act(), 0));
+
+	if (lv_obj_get_child(lv_scr_act(), 0) != NULL)
+		lv_obj_del(lv_obj_get_child(lv_scr_act(), 0));
+
 	lv_obj_set_style_pad_all(lv_scr_act(), 0, 0);
 
 	// Верхняя панель
@@ -79,7 +81,6 @@ static void timer_startscreen_end_handler(lv_timer_t *timer)
 	page->fullscreen = fullscreen;
 	page->deinit = page_default_deinit;
 
-	//	start_services();
 	homePageInit();
 
 	lv_timer_t *gui_manager_timer = lv_timer_create(timer_handler, SERVICE_PERIOD_GUI, 0);
@@ -97,6 +98,13 @@ static void timer_handler(lv_timer_t *timer)
 
 	if (glob_get_update_reg() & UPDATE_NOW)
 		return;
+
+	if ((glob_get_update_reg() & UPDATE_SD_NOW)
+			&& (page_current()->num != PAGE_SYS_UPDATE_NOW))
+	{
+		full_screen_page_update_sd_now();
+		return;
+	}
 
 	if (glob_get_status_err() & STATUS_ERROR_UPDATE)
 	{
@@ -175,7 +183,7 @@ static void timer_handler(lv_timer_t *timer)
 		break;
 		case PAGE_SYS_UPDATE_NOW:
 		{
-			full_screen_page_update_now();
+			full_screen_page_update_https_now();
 		}
 		break;
 		case PAGE_SYS_UPDATE_DONE:
@@ -202,6 +210,16 @@ static void msgbox_close_handler(lv_event_t * e)
 
 void GUI_manager_init(void)
 {
-	startscreen_init();
-	lv_timer_create(timer_startscreen_end_handler, 8000, 0);
+	uint32_t period = 8000;
+
+	FILE *file = fopen(FIRMWARE_PATH, "rb");
+	if (file != NULL)
+	{
+		fclose(file);
+		period = 0;
+	}
+	else
+		startscreen_init();
+
+	lv_timer_create(timer_startscreen_end_handler, period, 0);
 }

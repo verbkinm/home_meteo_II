@@ -27,7 +27,6 @@ static char *iotv_host = NULL;
 static uint16_t iotv_port = 0;
 
 static const char *TAG = "TCP_CLIENT";
-const static char *task_name = "tcp_client_task";
 
 static void tcp_client_run();
 static void tcp_client_check_conf_file(void);
@@ -250,7 +249,7 @@ void service_tcp_client_read_conf(void)
 void service_tcp_client_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
-	printf("%s %s start\n", TAG, task_name);
+	printf("%s task start\n", TAG);
 
 	tcp_client_check_conf_file();
 	service_tcp_client_read_conf();
@@ -258,7 +257,8 @@ void service_tcp_client_task(void *pvParameters)
 	for( ;; )
 	{
 		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+				|| (glob_get_update_reg() & UPDATE_NOW)
+				|| (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 
@@ -267,6 +267,7 @@ void service_tcp_client_task(void *pvParameters)
 
 		vTaskDelay(SERVICE_PERIOD_TCP_CLIENT / portTICK_PERIOD_MS);
 	}
+	printf("%s task stop\n", TAG);
 	vTaskDelete(NULL);
 }
 

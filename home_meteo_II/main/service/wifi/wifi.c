@@ -60,9 +60,6 @@ static void wifi_init(void)
 	wifi_config.ap.pmf_cfg.required = true;
 
 	ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_config));
-
-	check_wifi_conf_file();
-	service_wifi_read_conf();
 }
 
 static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void *event_data)
@@ -250,13 +247,18 @@ void service_wifi_read_conf(void)
 void service_wifi_task(void *pvParameters)
 {
 	vTaskDelay(DELAYED_LAUNCH / portTICK_PERIOD_MS);
+	printf("%s task start\n", TAG);
+
 	wifi_init();
-	vTaskDelay(500 / portTICK_PERIOD_MS);
+
+	check_wifi_conf_file();
+	service_wifi_read_conf();
 
 	for( ;; )
 	{
 		if (glob_get_status_err()
-				|| (glob_get_update_reg() & UPDATE_NOW))
+				|| (glob_get_update_reg() & UPDATE_NOW)
+				|| (glob_get_update_reg() & UPDATE_SD_NOW))
 			break;
 
 		if ( !(glob_get_status_reg() & STATUS_WIFI_AUTOCONNECT)
@@ -278,6 +280,7 @@ void service_wifi_task(void *pvParameters)
 		vTaskDelay(SERVICE_PERIOD_WIFI / portTICK_PERIOD_MS);
 	}
 	vTaskDelete(NULL);
+	printf("%s task stop\n", TAG);
 }
 
 esp_netif_t *service_wifi_sta_netif(void)

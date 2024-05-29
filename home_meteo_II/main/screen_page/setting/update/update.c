@@ -64,7 +64,7 @@ static void update_handler(lv_event_t *e)
 static void apply_update_handler(lv_event_t * e)
 {
 	glob_set_bits_update_reg(UPDATE_NOW);
-	full_screen_page_update_now();
+	full_screen_page_update_https_now();
 }
 
 static void factory_reset_handler(lv_event_t * e)
